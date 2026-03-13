@@ -1,0 +1,130 @@
+.admin-page {
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h2 {
+    font-family: var(--font-heading);
+    color: var(--primary-green);
+    font-size: 2rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-table th {
+    background-color: var(--primary-green);
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.data-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.btn-add {
+    background-color: var(--accent-gold);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.3s;
+}
+
+.btn-add:hover {
+    background-color: #b08d4b;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-cancel,
+.btn-save {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+    font-size: 0.9rem;
+}
+
+.btn-edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-delete {
+    background-color: #c0392b;
+    color: white;
+}
+
+.btn-save {
+    background-color: #2980b9;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}

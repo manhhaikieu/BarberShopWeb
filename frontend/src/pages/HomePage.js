@@ -1,0 +1,124 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './HomePage.css';
+
+import service1 from '../assets/images/service_1.png';
+// Placeholder imports - change the path to your actual images
+// import service2 from '../assets/images/service_1.png';
+// import service3 from '../assets/images/service_1.png';
+// import aboutImage from '../assets/images/service_1.png';
+import goidau from '../assets/images/goidau.png';
+import sapvuottoc from '../assets/images/sapvuottoc.png';
+import barbershop from '../assets/images/barbershop.png';
+import tho1 from '../assets/images/tho1.png';
+import tho2 from '../assets/images/tho2.png';
+
+const HomePage = () => {
+    // Team members data - you can add more images here
+    const teamImages = [tho1, tho2, tho1, tho2, tho1];
+
+    return (
+        <div className="home-wrapper">
+            {/* HERO SECTION */}
+            <section className="hero-section">
+                <div className="hero-content">
+                    <h1>BOOK<br />LỊCH HẸN!</h1>
+                    <Link to="/booking" className="btn-hero">ĐẶT LỊCH</Link>
+                </div>
+            </section>
+
+            {/* ABOUT SECTION */}
+            <section className="section-container about-section">
+                <div className="about-text">
+                    <h2>BARBERSHOP<br />CHUYÊN NGHIỆP</h2>
+                    <p>
+                        HKT Barber Shop là 1 chuỗi những cửa hàng cắt tóc cho nam giới tại Hà Nội & TP Hồ Chí Minh.
+                        Được thành lập từ năm 2019, với đội ngũ chuyên nghiệp và nhiệt tình, cam kết sẽ mang lại
+                        những kiểu tóc hài lòng nhất cho các đấng mày râu.
+                    </p>
+
+                    <div className="stats-row">
+                        <div className="stat-item">
+                            <span className="stat-number">200.000+</span>
+                            <span className="stat-label">Dịch vụ tuyệt vời!</span>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-number">10.000+</span>
+                            <span className="stat-label">Khách hàng đánh giá hài lòng</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="about-image">
+                    <img src={barbershop} alt="About HKT Barber Shop" className="img-placeholder-lg" style={{ objectFit: 'cover' }} />
+                </div>
+            </section>
+
+            {/* SERVICES / PRODUCTS TEASER */}
+            <section className="dark-section">
+                <div className="section-container">
+                    <div className="section-header center">
+                        <span className="sub-title">HKT BARBER SHOP - FROM HEART TO HAIR!</span>
+                        <h2>DỊCH VỤ - SẢN PHẨM</h2>
+                        <p className="intro-text">
+                            Với HKT Barber Shop bạn sẽ được trải nghiệm những dịch vụ tốt nhất trong một không gian chuyên nghiệp, thân thiện & gần gũi!
+                        </p>
+                    </div>
+
+                    <div className="services-grid">
+                        <div className="service-card">
+                            <div className="card-img" style={{ backgroundImage: `url(${service1})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                            <div className="card-content">
+                                <h3>CẮT - LÀM HÓA CHẤT</h3>
+                                <p>HKT cung cấp đa dạng dịch vụ cắt: Cắt Xả, Senior Cắt, Master Cắt và làm hóa chất: Uốn, Ép, Nhuộm,...</p>
+                            </div>
+                        </div>
+                        <div className="service-card">
+                            <div className="card-img" style={{ backgroundImage: `url(${goidau})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                            <div className="card-content">
+                                <h3>GỘI ĐẦU - RELAX</h3>
+                                <p>Trải nghiệm một không gian yên tĩnh và nhẹ nhàng giúp bạn có những phút giây thư giãn và thoải mái.</p>
+                            </div>
+                        </div>
+                        <div className="service-card">
+                            <div className="card-img" style={{ backgroundImage: `url(${sapvuottoc})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                            <div className="card-content">
+                                <h3>SẢN PHẨM</h3>
+                                <p>HKT cung cấp những sản phẩm chăm sóc & tạo kiểu tóc chính hãng, chất lượng đáp ứng đa dạng cho các kiểu tóc.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* TEAM SECTION (Placeholder Grid) */}
+            <section className="section-container">
+                <div className="section-header center">
+                    <h2>ĐỘI NGŨ BARBER</h2>
+                    <p>Là những người thợ có Tâm & được đào tạo bài bản.</p>
+                </div>
+                <div className="team-grid">
+                    {teamImages.map((img, index) => (
+                        <div key={index} className="team-member">
+                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', height: '100%' }}></div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* GALLERY SECTION */}
+            <section className="section-container">
+                <div className="section-header center">
+                    <h2>Sản phẩm nổi bật</h2>
+                    <p>Khám phá những sản phẩm mới nhất & đang thịnh hành.</p>
+                </div>
+                <div className="gallery-grid">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                        <div key={i} className="gallery-item placeholder"></div>
+                    ))}
+                </div>
+            </section>
+        </div>
+    );
+};
+
+export default HomePage;

@@ -1,0 +1,211 @@
+/* HomePage.css */
+
+.home-wrapper {
+    /* Main wrapper */
+}
+
+/* HERO SECTION */
+.hero-section {
+    height: 80vh;
+    background-color: #1b3a30;
+    /* Fallback */
+    /* Ideally add a background image here */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+}
+
+.hero-content h1 {
+    font-size: 5rem;
+    line-height: 1.1;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+.btn-hero {
+    display: inline-block;
+    background-color: white;
+    color: var(--secondary-black);
+    padding: 15px 40px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    letter-spacing: 1px;
+    transition: all 0.3s;
+}
+
+.btn-hero:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-gold);
+    color: white;
+}
+
+/* SECTIONS COMMON */
+.section-header.center {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.sub-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    max-width: 600px;
+    margin: 20px auto 0;
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+/* ABOUT SECTION */
+.about-section {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-text h2 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--primary-green);
+    line-height: 1.2;
+}
+
+.about-text p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.stats-row {
+    display: flex;
+    gap: 40px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--secondary-black);
+    font-family: var(--font-heading);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.about-image {
+    flex: 1;
+}
+
+.img-placeholder-lg {
+    width: 100%;
+    height: 400px;
+    background-color: #ddd;
+    border-radius: 20px;
+}
+
+/* DARK SECTION (SERVICES) */
+.dark-section {
+    background-color: var(--primary-green);
+    color: white;
+    padding: 80px 0;
+}
+
+.dark-section h2 {
+    font-size: 3rem;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.service-card {
+    background: white;
+    color: var(--text-dark);
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+.card-img {
+    height: 200px;
+    background-color: #ccc;
+    margin-bottom: 20px;
+}
+
+.card-content {
+    padding: 0 20px;
+}
+
+.card-content h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.card-content p {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* TEAM GRID */
+.team-grid {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.team-member {
+    min-width: 250px;
+    height: 350px;
+    background-color: #eee;
+}
+
+/* GALLERY GRID */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    background-color: #eee;
+}
+
+@media (max-width: 768px) {
+    .about-section {
+        flex-direction: column;
+    }
+
+    .hero-content h1 {
+        font-size: 3rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
