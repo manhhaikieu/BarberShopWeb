@@ -6,6 +6,7 @@ import Layout from './templates/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import BookingPage from './pages/BookingPage';
 import ProductPage from './pages/ProductPage';
 import StaffPage from './pages/StaffPage';
@@ -20,6 +21,7 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
               <Route path="/" element={<HomePage />} />
 
               <Route
