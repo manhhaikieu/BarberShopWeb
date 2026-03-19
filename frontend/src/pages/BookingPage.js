@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
-import { SEATS } from '../api/mockData';
 import './BookingPage.css';
 
 const BookingPage = () => {
-    const { services, bookings, addBooking } = useData();
+    const { services, chairs, bookings, addBooking, fetchBookings } = useData();
     const { user } = useAuth();
 
-    // State
     const [selectedServices, setSelectedServices] = useState([]);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [time, setTime] = useState('09:00');
-    const [selectedSeat, setSelectedSeat] = useState('');
+    const [selectedChair, setSelectedChair] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
-    // Derived State
     const totalDuration = selectedServices.reduce((acc, currId) => {
         const service = services.find(s => s.id === currId);
         return acc + (service ? service.duration : 0);
@@ -24,7 +22,7 @@ const BookingPage = () => {
 
     const totalPrice = selectedServices.reduce((acc, currId) => {
         const service = services.find(s => s.id === currId);
-        return acc + (service ? service.price : 0);
+        return acc + (service ? Number(service.price) : 0);
     }, 0);
 
     const handleServiceToggle = (id) => {
@@ -35,68 +33,54 @@ const BookingPage = () => {
         }
     };
 
-    const handleBook = (e) => {
+    const handleBook = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
         if (selectedServices.length === 0) {
-            setError('Please select at least one service.');
+            setError('Vui lòng chọn ít nhất 1 dịch vụ.');
             return;
         }
-        if (!selectedSeat) {
-            setError('Please select a seat.');
+        if (!selectedChair) {
+            setError('Vui lòng chọn ghế.');
             return;
         }
 
-        // Calculate Time Ranges
         const startDateTime = new Date(`${date}T${time}`);
-        const endDateTime = new Date(startDateTime.getTime() + totalDuration * 60000);
 
-        // Check Availability
-        const isConflict = bookings.some(booking => {
-            if (booking.seatId !== parseInt(selectedSeat) || booking.date !== date) return false;
-
-            const bStart = new Date(booking.startTime);
-            const bEnd = new Date(booking.endTime);
-
-            // Overlap check
-            return (startDateTime < bEnd && endDateTime > bStart);
-        });
-
-        if (isConflict) {
-            setError('This seat is already booked for the selected time range.');
-            return;
+        setSubmitting(true);
+        try {
+            await addBooking({
+                serviceIds: selectedServices,
+                startTime: startDateTime.toISOString(),
+                chairId: parseInt(selectedChair),
+            });
+            setSuccess('Đặt lịch thành công!');
+            setSelectedServices([]);
+            setSelectedChair('');
+            await fetchBookings();
+        } catch (err) {
+            setError(err.message || 'Đặt lịch thất bại.');
+        } finally {
+            setSubmitting(false);
         }
-
-        // Create Booking
-        const newBooking = {
-            userId: user.id,
-            userName: user.name,
-            serviceIds: selectedServices,
-            seatId: parseInt(selectedSeat),
-            date: date,
-            startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
-            totalPrice: totalPrice,
-            status: 'Confirmed'
-        };
-
-        addBooking(newBooking);
-        setSuccess('Booking successfully confirmed!');
-        // Reset form slightly
-        setSelectedServices([]);
     };
+
+    const todayBookings = bookings.filter(b => {
+        if (!b.startTime) return false;
+        const bDate = new Date(b.startTime).toISOString().split('T')[0];
+        return bDate === date && b.status !== 'cancelled';
+    });
 
     return (
         <div className="booking-container">
-            <h2>Book a Service</h2>
+            <h2>Đặt Lịch</h2>
 
             <div className="booking-grid">
-                {/* Left Column: Form */}
                 <div className="booking-form-section">
                     <form onSubmit={handleBook}>
-                        <div className="section-title">1. Choose Services</div>
+                        <div className="section-title">1. Chọn Dịch Vụ</div>
                         <div className="services-list">
                             {services.map(service => (
                                 <div
@@ -106,7 +90,7 @@ const BookingPage = () => {
                                 >
                                     <div className="service-info">
                                         <div className="service-name">{service.name}</div>
-                                        <div className="service-meta">{service.duration} mins • {service.price.toLocaleString()} đ</div>
+                                        <div className="service-meta">{service.duration} phút • {Number(service.price).toLocaleString()} đ</div>
                                     </div>
                                     <input
                                         type="checkbox"
@@ -117,36 +101,38 @@ const BookingPage = () => {
                             ))}
                         </div>
 
-                        <div className="section-title">2. Choose Date & Time</div>
+                        <div className="section-title">2. Chọn Ngày & Giờ</div>
                         <div className="datetime-controls">
                             <div className="form-group half">
-                                <label>Date</label>
+                                <label>Ngày</label>
                                 <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
                             </div>
                             <div className="form-group half">
-                                <label>Start Time</label>
+                                <label>Giờ bắt đầu</label>
                                 <input type="time" value={time} onChange={e => setTime(e.target.value)} required />
                             </div>
                         </div>
 
-                        <div className="section-title">3. Choose Seat</div>
+                        <div className="section-title">3. Chọn Ghế</div>
                         <div className="form-group">
-                            <label>Seat Selection</label>
-                            <select value={selectedSeat} onChange={e => setSelectedSeat(e.target.value)} required>
-                                <option value="">-- Select a Seat --</option>
-                                {SEATS.map(seat => (
-                                    <option key={seat.id} value={seat.id}>{seat.name}</option>
+                            <label>Ghế</label>
+                            <select value={selectedChair} onChange={e => setSelectedChair(e.target.value)} required>
+                                <option value="">-- Chọn ghế --</option>
+                                {chairs.filter(c => c.isAvailable).map(chair => (
+                                    <option key={chair.id} value={chair.id}>
+                                        {chair.name} {chair.barber ? `(${chair.barber.name})` : ''}
+                                    </option>
                                 ))}
                             </select>
                         </div>
 
                         <div className="booking-summary">
                             <div className="summary-row">
-                                <span>Total Duration:</span>
-                                <strong>{totalDuration} mins</strong>
+                                <span>Tổng thời gian:</span>
+                                <strong>{totalDuration} phút</strong>
                             </div>
                             <div className="summary-row">
-                                <span>Total Price:</span>
+                                <span>Tổng tiền:</span>
                                 <strong>{totalPrice.toLocaleString()} đ</strong>
                             </div>
                         </div>
@@ -154,19 +140,19 @@ const BookingPage = () => {
                         {error && <div className="error-msg">{error}</div>}
                         {success && <div className="success-msg">{success}</div>}
 
-                        <button type="submit" className="btn-book">Confirm Booking</button>
+                        <button type="submit" className="btn-book" disabled={submitting}>
+                            {submitting ? 'Đang đặt...' : 'Xác Nhận Đặt Lịch'}
+                        </button>
                     </form>
                 </div>
 
-                {/* Right Column: Existing Bookings (For visibility) */}
                 <div className="booking-info-section">
-                    <h3>Today's Schedule ({date})</h3>
-                    {bookings.filter(b => b.date === date).length === 0 ? (
-                        <p className="no-bookings">No bookings for this date yet.</p>
+                    <h3>Lịch hẹn ngày {date}</h3>
+                    {todayBookings.length === 0 ? (
+                        <p className="no-bookings">Chưa có lịch hẹn nào.</p>
                     ) : (
                         <div className="bookings-list">
-                            {bookings
-                                .filter(b => b.date === date)
+                            {todayBookings
                                 .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
                                 .map(b => (
                                     <div key={b.id} className="booking-card">
@@ -175,8 +161,9 @@ const BookingPage = () => {
                                             {new Date(b.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                         <div className="booking-details">
-                                            <strong>{SEATS.find(s => s.id === b.seatId)?.name}</strong>
-                                            <div>{b.userName}</div>
+                                            <strong>{b.chair?.name || `Ghế ${b.chairId}`}</strong>
+                                            <div>{b.user?.fullName || 'Khách hàng'}</div>
+                                            <div className={`status-badge status-${b.status}`}>{b.status}</div>
                                         </div>
                                     </div>
                                 ))}

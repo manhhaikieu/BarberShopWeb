@@ -1,53 +1,121 @@
-import React, { createContext, useContext, useState } from 'react';
-import { SERVICES, PRODUCTS as INITIAL_PRODUCTS, STAFF as INITIAL_STAFF } from '../api/mockData';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
+import { serviceAPI, productAPI, barberAPI, bookingAPI, chairAPI } from '../api/apiService';
 
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
-    const [products, setProducts] = useState(INITIAL_PRODUCTS);
-    const [staff, setStaff] = useState(INITIAL_STAFF);
-    const [services] = useState(SERVICES); // Services usually don't change often in this scope
+    const { user } = useAuth();
+    const [services, setServices] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [barbers, setBarbers] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [chairs, setChairs] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Product Actions
-    const addProduct = (product) => {
-        setProducts([...products, { ...product, id: Date.now() }]);
+    const fetchServices = useCallback(async () => {
+        try {
+            const data = await serviceAPI.getAll();
+            setServices(data.services || []);
+        } catch (err) { console.error('Fetch services:', err); }
+    }, []);
+
+    const fetchProducts = useCallback(async () => {
+        try {
+            const data = await productAPI.getAll();
+            setProducts(data.products || []);
+        } catch (err) { console.error('Fetch products:', err); }
+    }, []);
+
+    const fetchBarbers = useCallback(async () => {
+        try {
+            const data = await barberAPI.getAll();
+            setBarbers(data.barbers || []);
+        } catch (err) { console.error('Fetch barbers:', err); }
+    }, []);
+
+    const fetchBookings = useCallback(async () => {
+        try {
+            const data = await bookingAPI.getAll();
+            setBookings(data.bookings || []);
+        } catch (err) { console.error('Fetch bookings:', err); }
+    }, []);
+
+    const fetchChairs = useCallback(async () => {
+        try {
+            const data = await chairAPI.getAll();
+            setChairs(data.chairs || []);
+        } catch (err) { console.error('Fetch chairs:', err); }
+    }, []);
+
+    // Auto-fetch khi đăng nhập, clear khi đăng xuất
+    useEffect(() => {
+        if (user) {
+            setLoading(true);
+            Promise.all([fetchServices(), fetchProducts(), fetchBarbers(), fetchBookings(), fetchChairs()])
+                .finally(() => setLoading(false));
+        } else {
+            setServices([]);
+            setProducts([]);
+            setBarbers([]);
+            setBookings([]);
+            setChairs([]);
+        }
+    }, [user, fetchServices, fetchProducts, fetchBarbers, fetchBookings, fetchChairs]);
+
+    // Product CRUD
+    const addProduct = async (productData) => {
+        const data = await productAPI.create(productData);
+        setProducts(prev => [...prev, data.product]);
+        return data.product;
     };
 
-    const updateProduct = (id, updatedProduct) => {
-        setProducts(products.map(p => p.id === id ? { ...updatedProduct, id } : p));
+    const updateProduct = async (id, productData) => {
+        const data = await productAPI.update(id, productData);
+        setProducts(prev => prev.map(p => p.id === id ? data.product : p));
+        return data.product;
     };
 
-    const deleteProduct = (id) => {
-        setProducts(products.filter(p => p.id !== id));
+    const deleteProduct = async (id) => {
+        await productAPI.delete(id);
+        setProducts(prev => prev.filter(p => p.id !== id));
     };
 
-    // Staff Actions
-    const addStaff = (newStaff) => {
-        setStaff([...staff, { ...newStaff, id: Date.now() }]);
+    // Barber CRUD
+    const addBarber = async (barberData) => {
+        const data = await barberAPI.create(barberData);
+        setBarbers(prev => [...prev, data.barber]);
+        return data.barber;
     };
 
-    const updateStaff = (id, updatedStaff) => {
-        setStaff(staff.map(s => s.id === id ? { ...updatedStaff, id } : s));
+    const updateBarber = async (id, barberData) => {
+        const data = await barberAPI.update(id, barberData);
+        setBarbers(prev => prev.map(b => b.id === id ? data.barber : b));
+        return data.barber;
     };
 
-    const deleteStaff = (id) => {
-        setStaff(staff.filter(s => s.id !== id));
+    const deleteBarber = async (id) => {
+        await barberAPI.delete(id);
+        setBarbers(prev => prev.filter(b => b.id !== id));
     };
 
-    // Booking Actions
-    const addBooking = (booking) => {
-        setBookings([...bookings, { ...booking, id: Date.now() }]);
+    // Booking
+    const addBooking = async (bookingData) => {
+        const data = await bookingAPI.create(bookingData);
+        setBookings(prev => [...prev, data.booking]);
+        return data.booking;
     };
 
     return (
         <DataContext.Provider value={{
-            products, addProduct, updateProduct, deleteProduct,
-            staff, addStaff, updateStaff, deleteStaff,
-            services,
-            bookings, addBooking
+            services, fetchServices,
+            products, addProduct, updateProduct, deleteProduct, fetchProducts,
+            barbers, addBarber, updateBarber, deleteBarber, fetchBarbers,
+            bookings, addBooking, fetchBookings,
+            chairs, fetchChairs,
+            loading
         }}>
             {children}
         </DataContext.Provider>
