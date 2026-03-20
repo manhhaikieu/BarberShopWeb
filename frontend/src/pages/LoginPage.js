@@ -4,53 +4,63 @@ import { useAuth } from '../hooks/AuthContext';
 import './LoginPage.css';
 
 const LoginPage = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = login(username, password);
-        if (success) {
+        setError('');
+        setLoading(true);
+        try {
+            await login(email, password);
             navigate('/');
-        } else {
-            setError('Invalid username or password');
+        } catch (err) {
+            setError(err.message || 'Email hoac mat khau khong dung');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className="login-container">
             <div className="login-box">
-                <h2>Login</h2>
+                <h2>Dang Nhap</h2>
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Username</label>
+                        <label>Email</label>
                         <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Enter username"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Nhap email"
+                            required
                         />
                     </div>
                     <div className="form-group">
-                        <label>Password</label>
+                        <label>Mat khau</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter password"
+                            placeholder="Nhap mat khau"
+                            required
                         />
                     </div>
-                    <button type="submit" className="btn-submit">Login</button>
+                    <button type="submit" className="btn-submit" disabled={loading}>
+                        {loading ? 'Dang dang nhap...' : 'Dang Nhap'}
+                    </button>
                 </form>
-                <div className="login-tips">
-                    <small>admin/123, staff/123, user/123</small>
+                <div className="login-register-link">
+                    <small>Chua co tai khoan? <Link to="/register">Dang ky ngay</Link></small>
                 </div>
-                <div className="login-tips" style={{ marginTop: '10px' }}>
-                    <small>Chưa có tài khoản? <Link to="/register" style={{ color: '#3498db', textDecoration: 'none', fontWeight: '500' }}>Đăng ký ngay</Link></small>
+                <div className="login-tips">
+                    <small>Admin: admin@barbershop.com / admin123</small><br />
+                    <small>Staff: staff1@barbershop.com / staff123</small>
                 </div>
             </div>
         </div>

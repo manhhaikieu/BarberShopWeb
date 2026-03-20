@@ -54,6 +54,11 @@
     background-color: #2980b9;
 }
 
+.btn-submit:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
 .error-message {
     background-color: #fee;
     color: #c0392b;
@@ -63,8 +68,26 @@
     text-align: center;
 }
 
+.login-register-link {
+    text-align: center;
+    margin-top: 16px;
+    color: #7f8c8d;
+}
+
+.login-register-link a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-register-link a:hover {
+    text-decoration: underline;
+}
+
 .login-tips {
     text-align: center;
-    margin-top: 15px;
+    margin-top: 10px;
     color: #95a5a6;
+    border-top: 1px solid #ecf0f1;
+    padding-top: 10px;
 }
