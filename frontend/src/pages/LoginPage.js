@@ -85,6 +85,9 @@ const LoginPage = () => {
                         <span>customer1@barbershop.com / cust123</span>
                     </div>
                 </div>
+                <div className="login-tips" style={{ marginTop: '10px' }}>
+                    <small>Chưa có tài khoản? <Link to="/register" style={{ color: '#3498db', textDecoration: 'none', fontWeight: '500' }}>Đăng ký ngay</Link></small>
+                </div>
             </div>
         </div>
     );
