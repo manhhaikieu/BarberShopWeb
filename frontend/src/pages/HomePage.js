@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { useData } from '../hooks/DataContext';
 import './HomePage.css';
 
-import service1 from '../assets/images/service_1.png';
-import goidau from '../assets/images/goidau.png';
+import service1 from '../assets/images/service_1.jpg';
+import goidau from '../assets/images/goidau.jpg';
 import sapvuottoc from '../assets/images/sapvuottoc.png';
-import barbershop from '../assets/images/barbershop.png';
-import tho1 from '../assets/images/tho1.png';
+import barbershop from '../assets/images/barbershop.jpg';
+import tho1 from '../assets/images/tho1.jpg';
 import tho2 from '../assets/images/tho2.png';
 
 const HomePage = () => {
