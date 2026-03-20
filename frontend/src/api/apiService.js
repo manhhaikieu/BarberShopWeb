@@ -139,6 +139,20 @@ export const productAPI = {
     }).then(handleResponse),
 };
 
+// ── Upload ────────────────────────────────────────────
+export const uploadAPI = {
+  uploadProductImage: (file) => {
+    const token = localStorage.getItem('barber_token');
+    const formData = new FormData();
+    formData.append('image', file);
+    return fetch(`${BASE_URL}/upload/product-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    }).then(handleResponse);
+  },
+};
+
 // ── Barbers ───────────────────────────────────────────
 export const barberAPI = {
   getAll: () =>

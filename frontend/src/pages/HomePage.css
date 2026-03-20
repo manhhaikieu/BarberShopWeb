@@ -209,3 +209,59 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+/* PRODUCT CARDS - San pham noi bat */
+.product-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+}
+
+.product-card-img {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.product-card-no-img {
+    font-size: 3rem;
+    color: #ccc;
+}
+
+.product-card-info {
+    padding: 10px 12px 14px;
+}
+
+.product-card-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.product-card-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #c0392b;
+}

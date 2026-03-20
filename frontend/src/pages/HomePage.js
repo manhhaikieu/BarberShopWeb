@@ -1,12 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
+import { useData } from '../hooks/DataContext';
 import './HomePage.css';
 
 import service1 from '../assets/images/service_1.png';
-// Placeholder imports - change the path to your actual images
-// import service2 from '../assets/images/service_1.png';
-// import service3 from '../assets/images/service_1.png';
-// import aboutImage from '../assets/images/service_1.png';
 import goidau from '../assets/images/goidau.png';
 import sapvuottoc from '../assets/images/sapvuottoc.png';
 import barbershop from '../assets/images/barbershop.png';
@@ -14,8 +11,9 @@ import tho1 from '../assets/images/tho1.png';
 import tho2 from '../assets/images/tho2.png';
 
 const HomePage = () => {
-    // Team members data - you can add more images here
+    const { products } = useData();
     const teamImages = [tho1, tho2, tho1, tho2, tho1];
+    const featuredProducts = products.slice(0, 8);
 
     return (
         <div className="home-wrapper">
@@ -36,7 +34,6 @@ const HomePage = () => {
                         Được thành lập từ năm 2019, với đội ngũ chuyên nghiệp và nhiệt tình, cam kết sẽ mang lại
                         những kiểu tóc hài lòng nhất cho các đấng mày râu.
                     </p>
-
                     <div className="stats-row">
                         <div className="stat-item">
                             <span className="stat-number">200.000+</span>
@@ -63,7 +60,6 @@ const HomePage = () => {
                             Với HKT Barber Shop bạn sẽ được trải nghiệm những dịch vụ tốt nhất trong một không gian chuyên nghiệp, thân thiện & gần gũi!
                         </p>
                     </div>
-
                     <div className="services-grid">
                         <div className="service-card">
                             <div className="card-img" style={{ backgroundImage: `url(${service1})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
@@ -90,7 +86,7 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* TEAM SECTION (Placeholder Grid) */}
+            {/* TEAM SECTION */}
             <section className="section-container">
                 <div className="section-header center">
                     <h2>ĐỘI NGŨ BARBER</h2>
@@ -105,17 +101,37 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* GALLERY SECTION */}
+            {/* SẢN PHẨM NỔI BẬT */}
             <section className="section-container">
                 <div className="section-header center">
                     <h2>Sản phẩm nổi bật</h2>
                     <p>Khám phá những sản phẩm mới nhất & đang thịnh hành.</p>
                 </div>
-                <div className="gallery-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                        <div key={i} className="gallery-item placeholder"></div>
-                    ))}
-                </div>
+                {featuredProducts.length === 0 ? (
+                    <div className="gallery-grid">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="gallery-item placeholder"></div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="gallery-grid">
+                        {featuredProducts.map(product => (
+                            <div key={product.id} className="product-card">
+                                <div className="product-card-img">
+                                    {product.imageUrl ? (
+                                        <img src={product.imageUrl} alt={product.name} />
+                                    ) : (
+                                        <div className="product-card-no-img">📦</div>
+                                    )}
+                                </div>
+                                <div className="product-card-info">
+                                    <div className="product-card-name">{product.name}</div>
+                                    <div className="product-card-price">{Number(product.price).toLocaleString('vi-VN')}đ</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </section>
         </div>
     );

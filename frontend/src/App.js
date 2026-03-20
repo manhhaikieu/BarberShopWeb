@@ -10,8 +10,15 @@ import RegisterPage from './pages/RegisterPage';
 import BookingPage from './pages/BookingPage';
 import ProductPage from './pages/ProductPage';
 import StaffPage from './pages/StaffPage';
-import { CLAIMS } from './api/mockData';
 import './themes/theme.css';
+
+const PERMISSIONS = {
+  CREATE_BOOKING: 'CreateBooking',
+  MANAGE_PRODUCTS: 'ManageProduct',
+  MANAGE_BARBER: 'ManageBarber',
+  VIEW_BOOKING: 'ViewBooking',
+  MANAGE_BOOKING: 'ManageBooking',
+};
 
 function App() {
   return (
@@ -23,29 +30,26 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/" element={<HomePage />} />
-
               <Route
                 path="/booking"
                 element={
-                  <PrivateRoute requiredClaim={CLAIMS.CREATE_BOOKING}>
+                  <PrivateRoute requiredClaim={PERMISSIONS.CREATE_BOOKING}>
                     <BookingPage />
                   </PrivateRoute>
                 }
               />
-
               <Route
                 path="/products"
                 element={
-                  <PrivateRoute requiredClaim={CLAIMS.MANAGE_PRODUCTS}>
+                  <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_PRODUCTS}>
                     <ProductPage />
                   </PrivateRoute>
                 }
               />
-
               <Route
                 path="/staff"
                 element={
-                  <PrivateRoute requiredClaim={CLAIMS.MANAGE_STAFF}>
+                  <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_BARBER}>
                     <StaffPage />
                   </PrivateRoute>
                 }
