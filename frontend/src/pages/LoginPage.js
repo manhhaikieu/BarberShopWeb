@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
 import './LoginPage.css';
 
@@ -48,6 +48,9 @@ const LoginPage = () => {
                 </form>
                 <div className="login-tips">
                     <small>admin/123, staff/123, user/123</small>
+                </div>
+                <div className="login-tips" style={{ marginTop: '10px' }}>
+                    <small>Chưa có tài khoản? <Link to="/register" style={{ color: '#3498db', textDecoration: 'none', fontWeight: '500' }}>Đăng ký ngay</Link></small>
                 </div>
             </div>
         </div>
