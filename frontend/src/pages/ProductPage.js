@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { useData } from '../hooks/DataContext';
+import { uploadAPI } from '../api/apiService';
 import './AdminPages.css';
 
 const ProductPage = () => {
@@ -7,7 +8,24 @@ const ProductPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentProduct, setCurrentProduct] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
+    const fileInputRef = useRef(null);
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        setError('');
+        try {
+            const data = await uploadAPI.uploadProductImage(file);
+            setCurrentProduct(prev => ({ ...prev, imageUrl: `http://localhost:5000${data.imageUrl}` }));
+        } catch (err) {
+            setError('Upload ảnh thất bại: ' + (err.message || ''));
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleEdit = (product) => {
         setCurrentProduct({ ...product });
@@ -26,7 +44,7 @@ const ProductPage = () => {
     };
 
     const handleAddNew = () => {
-        setCurrentProduct({ name: '', category: '', price: 0, stockQuantity: 0, description: '' });
+        setCurrentProduct({ name: '', category: '', price: 0, stockQuantity: 0, description: '', imageUrl: '' });
         setIsModalOpen(true);
         setError('');
     };
@@ -59,6 +77,7 @@ const ProductPage = () => {
             <table className="data-table">
                 <thead>
                     <tr>
+                        <th>Ảnh</th>
                         <th>Tên</th>
                         <th>Danh mục</th>
                         <th>Giá</th>
@@ -69,6 +88,16 @@ const ProductPage = () => {
                 <tbody>
                     {products.map(product => (
                         <tr key={product.id}>
+                            <td>
+                                {product.imageUrl ? (
+                                    <img src={product.imageUrl} alt={product.name}
+                                        style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 8 }} />
+                                ) : (
+                                    <div style={{ width: 56, height: 56, background: '#eee', borderRadius: 8,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#aaa', fontSize: 22 }}>📦</div>
+                                )}
+                            </td>
                             <td>{product.name}</td>
                             <td>{product.category}</td>
                             <td>{Number(product.price).toLocaleString()} đ</td>
@@ -129,9 +158,53 @@ const ProductPage = () => {
                                     onChange={e => setCurrentProduct({ ...currentProduct, description: e.target.value })}
                                 />
                             </div>
+
+                            <div className="form-group">
+                                <label>Hình ảnh sản phẩm</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 6 }}>
+                                    {currentProduct.imageUrl ? (
+                                        <img
+                                            src={currentProduct.imageUrl}
+                                            alt="preview"
+                                            style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 10, border: '1px solid #ddd' }}
+                                        />
+                                    ) : (
+                                        <div style={{ width: 90, height: 90, background: '#f0f0f0', borderRadius: 10,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: '#bbb', fontSize: 32, border: '1px dashed #ccc' }}>📷</div>
+                                    )}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            ref={fileInputRef}
+                                            style={{ display: 'none' }}
+                                            onChange={handleImageUpload}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn-edit"
+                                            onClick={() => fileInputRef.current.click()}
+                                            disabled={uploading}
+                                        >
+                                            {uploading ? '⏳ Đang tải lên...' : currentProduct.imageUrl ? '🔄 Đổi ảnh' : '📷 Chọn ảnh'}
+                                        </button>
+                                        {currentProduct.imageUrl && (
+                                            <button
+                                                type="button"
+                                                className="btn-delete"
+                                                onClick={() => setCurrentProduct(prev => ({ ...prev, imageUrl: '' }))}
+                                            >
+                                                🗑 Xóa ảnh
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
                                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                                <button type="submit" className="btn-save" disabled={saving}>
+                                <button type="submit" className="btn-save" disabled={saving || uploading}>
                                     {saving ? 'Đang lưu...' : 'Lưu'}
                                 </button>
                             </div>

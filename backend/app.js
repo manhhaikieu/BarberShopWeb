@@ -3,12 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const { sequelize } = require('./src/models');
 
+const path = require('path');
 const authRoutes = require('./src/routes/auth');
 const bookingRoutes = require('./src/routes/bookings');
 const serviceRoutes = require('./src/routes/services');
 const productRoutes = require('./src/routes/products');
 const barberRoutes = require('./src/routes/barbers');
 const chairRoutes = require('./src/routes/chairs');
+const uploadRoutes = require('./src/routes/upload');
 
 const app = express();
 
@@ -16,6 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── Routes ─────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
@@ -24,6 +27,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/barbers', barberRoutes);
 app.use('/api/chairs', chairRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ── Health check ───────────────────────────────────────
 app.get('/api/health', (req, res) => {
