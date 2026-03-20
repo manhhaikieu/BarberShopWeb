@@ -12,6 +12,7 @@ import ProductPage from './pages/ProductPage';
 import StaffPage from './pages/StaffPage';
 import './themes/theme.css';
 
+// Permissions khớp với backend (Claim-based)
 const PERMISSIONS = {
   CREATE_BOOKING: 'CreateBooking',
   MANAGE_PRODUCTS: 'ManageProduct',
@@ -30,6 +31,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/" element={<HomePage />} />
+
               <Route
                 path="/booking"
                 element={
@@ -38,6 +40,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+
               <Route
                 path="/products"
                 element={
@@ -46,6 +49,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+
               <Route
                 path="/staff"
                 element={

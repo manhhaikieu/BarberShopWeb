@@ -24,6 +24,7 @@ const Layout = ({ children }) => {
 
             <header className="main-header">
                 <div className="logo-section">
+                    {/* Placeholder for Logo Image, using Text for now but styled */}
                     <Link to="/" className="logo-text">
                         <span className="logo-icon">✂️</span>
                         <div className="brand-name">
@@ -37,6 +38,7 @@ const Layout = ({ children }) => {
                     <Link to="/" className={isActive('/')}>Home</Link>
                     <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
 
+                    {/* Admin/Staff Links (Hidden for Customers) */}
                     {hasClaim('ManageProduct') && (
                         <Link to="/products" className={isActive('/products')}>Sản Phẩm</Link>
                     )}
@@ -45,6 +47,7 @@ const Layout = ({ children }) => {
                         <Link to="/staff" className={isActive('/staff')}>Thợ</Link>
                     )}
 
+                    {/* User State */}
                     {user ? (
                         <span className="nav-user-action" onClick={handleLogout}>
                             Logout ({user.fullName || user.username})
