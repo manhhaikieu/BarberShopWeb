@@ -39,6 +39,10 @@ const Layout = ({ children }) => {
                     <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
 
                     {/* Admin/Staff Links (Hidden for Customers) */}
+                    {hasClaim('ViewBooking') && hasClaim('ManageProduct') && hasClaim('ManageBarber') && (
+                        <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+                    )}
+
                     {hasClaim('ManageProduct') && (
                         <Link to="/products" className={isActive('/products')}>Sản Phẩm</Link>
                     )}

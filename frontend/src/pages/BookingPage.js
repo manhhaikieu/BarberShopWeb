@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
+import { bookingAPI } from '../api/apiService';
 import './BookingPage.css';
 
 const TIME_SLOTS = [];
@@ -21,6 +22,14 @@ const BookingPage = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [dailyBookings, setDailyBookings] = useState([]);
+
+    useEffect(() => {
+        if (!date) return;
+        bookingAPI.getBusySlots(date)
+            .then(res => setDailyBookings(res.bookings || []))
+            .catch(err => console.error("Lỗi lấy lịch bận:", err));
+    }, [date, success]);
 
     const handleServiceToggle = (id) => {
         setSelectedServices(prev =>
@@ -78,7 +87,42 @@ const BookingPage = () => {
         }
     };
 
-    const availableChairs = chairs.filter(c => c.isAvailable !== false);
+    const activeChairs = chairs.filter(c => c.isAvailable !== false);
+
+    // Kiểm tra giờ này có ghế nào trống không?
+    const isTimeSlotValid = (timeStr) => {
+        const dur = totalDuration || 30; // Mặc định 30p nếu chưa chọn dịch vụ
+        const startObj = new Date(`${date}T${timeStr}`);
+        const endObj = new Date(startObj.getTime() + dur * 60000);
+        
+        // Không cho đặt giờ trong quá khứ của ngày hôm nay
+        const now = new Date();
+        if (startObj <= now) return false;
+
+        // Tìm các booking bị trùng giờ
+        const busyChairIds = dailyBookings.filter(b => {
+            const bStart = new Date(b.startTime);
+            const bEnd = new Date(b.endTime);
+            // Có giao nhau về thời gian
+            return bStart < endObj && bEnd > startObj;
+        }).map(b => b.chairId);
+
+        // Xem còn bao nhiêu ghế trống
+        const availableCount = activeChairs.filter(c => !busyChairIds.includes(c.id)).length;
+        return availableCount > 0;
+    };
+
+    // Tìm danh sách ghế trồng cho khung giờ ĐÃ CHỌN
+    const busyChairIdsAtSelectedTime = selectedTime ? dailyBookings.filter(b => {
+        const startObj = new Date(`${date}T${selectedTime}`);
+        const endObj = new Date(startObj.getTime() + (totalDuration || 30) * 60000);
+        const bStart = new Date(b.startTime);
+        const bEnd = new Date(b.endTime);
+        return bStart < endObj && bEnd > startObj;
+    }).map(b => b.chairId) : [];
+
+    // Filter available chairs dynamically
+    const dynamicallyAvailableChairs = activeChairs.filter(c => !busyChairIdsAtSelectedTime.includes(c.id));
 
     return (
         <div className="bk-page">
@@ -151,7 +195,11 @@ const BookingPage = () => {
                         className="bk-input"
                         type="date"
                         value={date}
-                        onChange={e => setDate(e.target.value)}
+                        onChange={e => {
+                            setDate(e.target.value);
+                            setSelectedTime(''); // Reset time when date changes
+                            setSelectedChair('');
+                        }}
                         required
                     />
                 </div>
@@ -159,42 +207,61 @@ const BookingPage = () => {
                 {/* GIỜ */}
                 <div className="bk-section-label">Giờ hẹn <span className="bk-req">*</span></div>
                 <div className="bk-time-grid">
-                    {TIME_SLOTS.map(t => (
-                        <button
-                            key={t}
-                            type="button"
-                            className={`bk-time-btn${selectedTime === t ? ' active' : ''}`}
-                            onClick={() => setSelectedTime(t)}
-                        >
-                            {t}
-                        </button>
-                    ))}
+                    {TIME_SLOTS.map(t => {
+                        const valid = isTimeSlotValid(t);
+                        return (
+                            <button
+                                key={t}
+                                type="button"
+                                disabled={!valid}
+                                className={`bk-time-btn${selectedTime === t ? ' active' : ''}${!valid ? ' disabled' : ''}`}
+                                onClick={() => {
+                                    if(valid) {
+                                        setSelectedTime(t);
+                                        setSelectedChair(''); // Reset chair when time changes
+                                    }
+                                }}
+                                style={!valid ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#f0f0f0', color: '#999' } : {}}
+                            >
+                                {t}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* GHẾ */}
                 <div className="bk-section-label">Chọn ghế <span className="bk-req">*</span></div>
-                {availableChairs.length === 0 ? (
-                    <div className="bk-empty">Hiện không có ghế trống.</div>
+                {!selectedTime ? (
+                    <div className="bk-empty" style={{ color: '#888' }}>Vui lòng chọn giờ hẹn trước để xem trạng thái ghế.</div>
+                ) : dynamicallyAvailableChairs.length === 0 ? (
+                    <div className="bk-empty" style={{ color: '#d9534f', fontWeight: 'bold' }}>Hết ghế trống vào lúc {selectedTime} (Thời lượng: {totalDuration||30} phút). Vui lòng chọn giờ khác.</div>
                 ) : (
                     <div className="bk-chairs">
-                        {availableChairs.map(chair => (
-                            <label
-                                key={chair.id}
-                                className={`bk-chair-item${selectedChair === String(chair.id) ? ' active' : ''}`}
-                            >
-                                <input
-                                    type="radio"
-                                    name="chair"
-                                    value={chair.id}
-                                    checked={selectedChair === String(chair.id)}
-                                    onChange={() => setSelectedChair(String(chair.id))}
-                                />
-                                <span className="bk-chair-name">{chair.name}</span>
-                                {chair.barber && (
-                                    <span className="bk-pin">📍 {chair.barber.name}</span>
-                                )}
-                            </label>
-                        ))}
+                        {activeChairs.map(chair => {
+                            const isBusy = busyChairIdsAtSelectedTime.includes(chair.id);
+                            return (
+                                <label
+                                    key={chair.id}
+                                    className={`bk-chair-item${selectedChair === String(chair.id) ? ' active' : ''}${isBusy ? ' disabled' : ''}`}
+                                    style={isBusy ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#f9f9f9' } : {}}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="chair"
+                                        value={chair.id}
+                                        checked={selectedChair === String(chair.id)}
+                                        disabled={isBusy}
+                                        onChange={() => !isBusy && setSelectedChair(String(chair.id))}
+                                    />
+                                    <span className="bk-chair-name">
+                                        {chair.name} {isBusy && <span style={{ color: 'red', fontSize: '0.8rem' }}>(Đã có khách hẹn)</span>}
+                                    </span>
+                                    {chair.barber && (
+                                        <span className="bk-pin">📍 {chair.barber.name}</span>
+                                    )}
+                                </label>
+                            );
+                        })}
                     </div>
                 )}
 

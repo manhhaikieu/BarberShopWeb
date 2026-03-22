@@ -58,4 +58,16 @@ const getProfile = async (req, res) => {
   return res.json({ user: req.user, permissions: req.permissions });
 };
 
-module.exports = { register, login, getProfile };
+const getStaffUsers = async (req, res) => {
+  try {
+    const staff = await User.findAll({
+      where: { role: 'staff' },
+      attributes: ['id', 'fullName', 'username', 'email']
+    });
+    return res.json({ staff });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi server', error: err.message });
+  }
+};
+
+module.exports = { register, login, getProfile, getStaffUsers };

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
+import { authAPI } from '../api/apiService';
 import './AdminPages.css';
 
 const StaffPage = () => {
@@ -8,6 +9,11 @@ const StaffPage = () => {
     const [currentBarber, setCurrentBarber] = useState(null);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [staffUsers, setStaffUsers] = useState([]);
+
+    useEffect(() => {
+        authAPI.getStaffUsers().then(res => setStaffUsers(res.staff || [])).catch(console.error);
+    }, []);
 
     const handleEdit = (barber) => {
         setCurrentBarber({ ...barber });
@@ -41,6 +47,7 @@ const StaffPage = () => {
                 experienceYears: parseInt(currentBarber.experienceYears),
                 phone: currentBarber.phone,
                 chairId: currentBarber.chairId ? parseInt(currentBarber.chairId) : null,
+                userId: currentBarber.userId ? parseInt(currentBarber.userId) : null,
             };
             if (currentBarber.id) {
                 await updateBarber(currentBarber.id, payload);
@@ -134,6 +141,18 @@ const StaffPage = () => {
                                         .map(chair => (
                                             <option key={chair.id} value={chair.id}>{chair.name}</option>
                                         ))}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Tài khoản liên kết (User)</label>
+                                <select
+                                    value={currentBarber.userId || ''}
+                                    onChange={e => setCurrentBarber({ ...currentBarber, userId: e.target.value })}
+                                >
+                                    <option value="">-- Không liên kết --</option>
+                                    {staffUsers.map(u => (
+                                        <option key={u.id} value={u.id}>{u.fullName || u.username} ({u.email})</option>
+                                    ))}
                                 </select>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>

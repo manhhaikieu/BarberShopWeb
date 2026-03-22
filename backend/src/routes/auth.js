@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { register, login, getProfile } = require('../controllers/authController');
+const { register, login, getProfile, getStaffUsers } = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/permissions');
 
 router.post('/register', [
   body('username').notEmpty().withMessage('Username là bắt buộc'),
@@ -16,5 +17,6 @@ router.post('/login', [
 ], login);
 
 router.get('/profile', authenticate, getProfile);
+router.get('/staff-users', authenticate, requirePermission('ManageBarber'), getStaffUsers);
 
 module.exports = router;

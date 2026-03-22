@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import BookingPage from './pages/BookingPage';
 import ProductPage from './pages/ProductPage';
 import StaffPage from './pages/StaffPage';
+import BarberDashboard from './pages/BarberDashboard';
 import './themes/theme.css';
 
 // Permissions khớp với backend (Claim-based)
@@ -37,6 +38,15 @@ function App() {
                 element={
                   <PrivateRoute requiredClaim={PERMISSIONS.CREATE_BOOKING}>
                     <BookingPage />
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute requiredClaim={PERMISSIONS.VIEW_BOOKING}>
+                    <BarberDashboard />
                   </PrivateRoute>
                 }
               />

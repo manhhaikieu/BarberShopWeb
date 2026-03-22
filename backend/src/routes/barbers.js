@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { getAllBarbers, getBarberById, createBarber, updateBarber, deleteBarber, getBarberSchedule } = require('../controllers/barberController');
+const { getAllBarbers, getBarberById, createBarber, updateBarber, deleteBarber, getBarberSchedule, getMySchedule } = require('../controllers/barberController');
 const { authenticate } = require('../middleware/auth');
 const { requirePermission } = require('../middleware/permissions');
 
 router.get('/', getAllBarbers);
+router.get('/my-schedule', authenticate, requirePermission('ViewBooking'), getMySchedule);
 router.get('/:id', getBarberById);
 router.get('/:id/schedule', authenticate, requirePermission('ViewBooking'), getBarberSchedule);
 

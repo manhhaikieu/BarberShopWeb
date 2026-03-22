@@ -17,7 +17,11 @@ const LoginPage = () => {
         setLoading(true);
         try {
             const user = await login(email, password);
-            navigate('/');
+            if (user.role === 'staff' || user.role === 'admin') {
+                navigate('/dashboard');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             setError(err.message || 'Email hoặc mật khẩu không đúng');
         } finally {
