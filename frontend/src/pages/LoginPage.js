@@ -20,7 +20,7 @@ const LoginPage = () => {
             if (user.role === 'admin') {
                 navigate('/admin');
             } else if (user.role === 'staff') {
-                navigate('/dashboard');
+                navigate('/barber');
             } else {
                 navigate('/');
             }
