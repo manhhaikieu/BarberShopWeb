@@ -44,10 +44,6 @@ ProductSale.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 User.hasMany(ProductSale, { foreignKey: 'userId', as: 'productSales' });
 ProductSale.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
-// ── Quan hệ User - Barber (Thợ thuộc về một User) ────────
-User.hasOne(Barber, { foreignKey: 'userId', as: 'barberProfile' });
-Barber.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-
 module.exports = {
   sequelize,
   User,

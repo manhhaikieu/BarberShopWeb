@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/AuthContext';
 import './Layout.css';
 
 const Layout = ({ children }) => {
-    const { user, logout, hasClaim } = useAuth();
+    const { user, logout, hasClaim, hasRole } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -36,17 +36,21 @@ const Layout = ({ children }) => {
 
                 <nav className="main-nav">
                     <Link to="/" className={isActive('/')}>Home</Link>
-                    <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
 
-                    {/* Staff dashboard */}
-                    {hasClaim('ViewBooking') && !hasClaim('ManageBooking') && (
-                        <Link to="/dashboard" className={isActive('/dashboard')}>Lịch của tôi</Link>
+                    {/* Nav dành cho customer/staff – ẩn với admin */}
+                    {!hasRole('admin') && (
+                        <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
                     )}
 
-                    {/* Admin Panel link */}
-                    {hasClaim('ManageBooking') && (
-                        <Link to="/admin" className={isActive('/admin')} style={{ color: '#d4af37', fontWeight: 800 }}>
-                            ⚙️ Admin
+                    {/* Staff dashboard – chỉ hiện với staff */}
+                    {hasClaim('ViewBooking') && !hasClaim('ManageBooking') && (
+                        <Link to="/barber" className={isActive('/barber')}>Lịch của tôi</Link>
+                    )}
+
+                    {/* Admin Panel link – nếu admin lạc vào Layout thì có link quay lại */}
+                    {hasRole('admin') && (
+                        <Link to="/admin" style={{ color: '#d4af37', fontWeight: 800 }}>
+                            ⚙️ Về trang Admin
                         </Link>
                     )}
 

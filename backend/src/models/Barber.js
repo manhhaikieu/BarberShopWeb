@@ -7,7 +7,6 @@ module.exports = (sequelize) => {
     experienceYears: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     phone: { type: DataTypes.STRING(20) },
     avatar: { type: DataTypes.STRING },
-    userId: { type: DataTypes.INTEGER, allowNull: true },
   });
   return Barber;
 };

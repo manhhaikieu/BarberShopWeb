@@ -4,14 +4,16 @@ import { useAuth } from '../hooks/AuthContext';
 
 /**
  * Claim-based Route Guard
- * - Chua dang nhap      → redirect /login
+ * - Chua dang nhap              → redirect /login
+ * - adminOnly=true & role!=admin → redirect /
+ * - staffOnly=true & role!=staff → admin→/admin, customer→/
+ * - customerOnly=true & role!=customer → admin→/admin, staff→/barber
  * - Dang nhap nhung thieu claim → hien 403 Access Denied
- * - Co claim            → render children
+ * - Co claim                    → render children
  */
-const PrivateRoute = ({ children, requiredClaim }) => {
+const PrivateRoute = ({ children, requiredClaim, adminOnly = false, staffOnly = false, customerOnly = false }) => {
     const { user, loading, hasClaim } = useAuth();
 
-    // Doi AuthContext kiem tra localStorage xong moi quyet dinh
     if (loading) {
         return (
             <div style={{ textAlign: 'center', marginTop: '80px', color: '#7f8c8d' }}>
@@ -20,9 +22,29 @@ const PrivateRoute = ({ children, requiredClaim }) => {
         );
     }
 
-    // Chua dang nhap
     if (!user) {
         return <Navigate to="/login" replace />;
+    }
+
+    // Chi admin moi vao duoc
+    if (adminOnly && user.role !== 'admin') {
+        return user.role === 'staff'
+            ? <Navigate to="/barber" replace />
+            : <Navigate to="/" replace />;
+    }
+
+    // Chi staff moi vao duoc
+    if (staffOnly && user.role !== 'staff') {
+        return user.role === 'admin'
+            ? <Navigate to="/admin" replace />
+            : <Navigate to="/" replace />;
+    }
+
+    // Chi customer moi vao duoc
+    if (customerOnly && user.role !== 'customer') {
+        return user.role === 'admin'
+            ? <Navigate to="/admin" replace />
+            : <Navigate to="/barber" replace />;
     }
 
     // Da dang nhap nhung thieu claim can thiet

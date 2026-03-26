@@ -42,12 +42,6 @@ const AdminLayout = ({ children }) => {
                     <NavLink to="/admin/bookings" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
                         <span className="nav-icon">📅</span> Quản lý Lịch hẹn
                     </NavLink>
-
-                    <div className="admin-nav-divider" />
-
-                    <NavLink to="/" className="admin-nav-item">
-                        <span className="nav-icon">🏠</span> Trang chủ
-                    </NavLink>
                 </nav>
 
                 <div className="admin-sidebar-footer">
