@@ -17,7 +17,9 @@ const LoginPage = () => {
         setLoading(true);
         try {
             const user = await login(email, password);
-            if (user.role === 'staff' || user.role === 'admin') {
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else if (user.role === 'staff') {
                 navigate('/dashboard');
             } else {
                 navigate('/');

@@ -108,13 +108,61 @@ export const DataProvider = ({ children }) => {
         return data.booking;
     };
 
+    const updateBookingStatus = async (id, status) => {
+        const data = await bookingAPI.updateStatus(id, status);
+        setBookings(prev => prev.map(b => b.id === id ? data.booking : b));
+        return data.booking;
+    };
+
+    const cancelBooking = async (id) => {
+        const data = await bookingAPI.cancel(id);
+        setBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'cancelled' } : b));
+        return data;
+    };
+
+    // Service CRUD
+    const addService = async (serviceData) => {
+        const data = await serviceAPI.create(serviceData);
+        setServices(prev => [...prev, data.service]);
+        return data.service;
+    };
+
+    const updateService = async (id, serviceData) => {
+        const data = await serviceAPI.update(id, serviceData);
+        setServices(prev => prev.map(s => s.id === id ? data.service : s));
+        return data.service;
+    };
+
+    const deleteService = async (id) => {
+        await serviceAPI.delete(id);
+        setServices(prev => prev.filter(s => s.id !== id));
+    };
+
+    // Chair CRUD
+    const addChair = async (chairData) => {
+        const data = await chairAPI.create(chairData);
+        setChairs(prev => [...prev, data.chair]);
+        return data.chair;
+    };
+
+    const updateChair = async (id, chairData) => {
+        const data = await chairAPI.update(id, chairData);
+        setChairs(prev => prev.map(c => c.id === id ? data.chair : c));
+        return data.chair;
+    };
+
+    const deleteChair = async (id) => {
+        await chairAPI.delete(id);
+        setChairs(prev => prev.filter(c => c.id !== id));
+    };
+
     return (
         <DataContext.Provider value={{
-            services, fetchServices,
+            services, fetchServices, addService, updateService, deleteService,
             products, addProduct, updateProduct, deleteProduct, fetchProducts,
             barbers, addBarber, updateBarber, deleteBarber, fetchBarbers,
-            bookings, addBooking, fetchBookings,
-            chairs, fetchChairs,
+            bookings, addBooking, updateBookingStatus, cancelBooking, fetchBookings,
+            chairs, addChair, updateChair, deleteChair, fetchChairs,
             loading
         }}>
             {children}

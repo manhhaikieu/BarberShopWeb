@@ -38,17 +38,16 @@ const Layout = ({ children }) => {
                     <Link to="/" className={isActive('/')}>Home</Link>
                     <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
 
-                    {/* Admin/Staff Links (Hidden for Customers) */}
-                    {hasClaim('ViewBooking') && hasClaim('ManageProduct') && hasClaim('ManageBarber') && (
-                        <Link to="/dashboard" className={isActive('/dashboard')}>Dashboard</Link>
+                    {/* Staff dashboard */}
+                    {hasClaim('ViewBooking') && !hasClaim('ManageBooking') && (
+                        <Link to="/dashboard" className={isActive('/dashboard')}>Lịch của tôi</Link>
                     )}
 
-                    {hasClaim('ManageProduct') && (
-                        <Link to="/products" className={isActive('/products')}>Sản Phẩm</Link>
-                    )}
-
-                    {hasClaim('ManageBarber') && (
-                        <Link to="/staff" className={isActive('/staff')}>Thợ</Link>
+                    {/* Admin Panel link */}
+                    {hasClaim('ManageBooking') && (
+                        <Link to="/admin" className={isActive('/admin')} style={{ color: '#d4af37', fontWeight: 800 }}>
+                            ⚙️ Admin
+                        </Link>
                     )}
 
                     {/* User State */}
