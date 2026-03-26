@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
+    // login nhận email + password, gọi API thật
     const login = async (email, password) => {
         const data = await authAPI.login(email, password);
         setUser(data.user);

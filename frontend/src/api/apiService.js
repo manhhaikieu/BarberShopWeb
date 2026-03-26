@@ -36,6 +36,11 @@ export const authAPI = {
     fetch(`${BASE_URL}/auth/profile`, {
       headers: getHeaders(),
     }).then(handleResponse),
+
+  getStaffUsers: () =>
+    fetch(`${BASE_URL}/auth/staff-users`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
 };
 
 // ── Services ──────────────────────────────────────────
@@ -73,6 +78,9 @@ export const bookingAPI = {
     const query = new URLSearchParams(params).toString();
     return fetch(`${BASE_URL}/bookings?${query}`, { headers: getHeaders() }).then(handleResponse);
   },
+
+  getBusySlots: (date) =>
+    fetch(`${BASE_URL}/bookings/busy?date=${date}`, { headers: getHeaders() }).then(handleResponse),
 
   getMy: () =>
     fetch(`${BASE_URL}/bookings/my`, { headers: getHeaders() }).then(handleResponse),
@@ -183,6 +191,11 @@ export const barberAPI = {
 
   getSchedule: (id, date) =>
     fetch(`${BASE_URL}/barbers/${id}/schedule?date=${date}`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
+
+  getMySchedule: (date) =>
+    fetch(`${BASE_URL}/barbers/my-schedule?date=${date || ''}`, {
       headers: getHeaders(),
     }).then(handleResponse),
 };

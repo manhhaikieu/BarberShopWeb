@@ -7,6 +7,7 @@ const { requirePermission } = require('../middleware/permissions');
 
 router.get('/', authenticate, requirePermission('ViewBooking'), getAllBookings);
 router.get('/my', authenticate, getMyBookings);
+router.get('/busy', authenticate, require('express-validator').query('date').isString(), require('../controllers/bookingController').getBusySlots);
 router.get('/:id', authenticate, requirePermission('ViewBooking'), getBookingById);
 
 router.post('/', authenticate, requirePermission('CreateBooking'), [

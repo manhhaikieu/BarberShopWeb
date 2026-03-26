@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
 import { bookingAPI } from '../api/apiService';
@@ -11,207 +11,270 @@ for (let h = 9; h <= 19; h++) {
 }
 
 const BookingPage = () => {
-    const { services, barbers, chairs } = useData();
+    const { services, chairs, addBooking, fetchBookings } = useData();
     const { user } = useAuth();
 
-    const [phone, setPhone] = useState('');
-    const [fullName, setFullName] = useState('');
-    const [guestCount, setGuestCount] = useState(1);
-    const [selectedChair, setSelectedChair] = useState('');
-    const [selectedBarber, setSelectedBarber] = useState('');
-    const [serviceRows, setServiceRows] = useState([{ id: '', key: 1 }]);
-    const [silentBarber, setSilentBarber] = useState(false);
-    const [date, setDate] = useState('');
+    const [selectedServices, setSelectedServices] = useState([]);
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedTime, setSelectedTime] = useState('');
+    const [selectedChair, setSelectedChair] = useState('');
+    const [notes, setNotes] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [dailyBookings, setDailyBookings] = useState([]);
 
     useEffect(() => {
-        if (user) {
-            setPhone(user.phone || '');
-            setFullName(user.fullName || '');
-        }
-    }, [user]);
+        if (!date) return;
+        bookingAPI.getBusySlots(date)
+            .then(res => setDailyBookings(res.bookings || []))
+            .catch(err => console.error("Lỗi lấy lịch bận:", err));
+    }, [date, success]);
 
-    const selectedServices = serviceRows
-        .map(r => services.find(s => String(s.id) === String(r.id)))
-        .filter(Boolean);
+    const handleServiceToggle = (id) => {
+        setSelectedServices(prev =>
+            prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+        );
+    };
 
-    const totalPrice = selectedServices.reduce((acc, s) => acc + Number(s.price), 0);
-    const totalDuration = selectedServices.reduce((acc, s) => acc + Number(s.duration), 0);
+    const totalDuration = selectedServices.reduce((acc, id) => {
+        const s = services.find(sv => sv.id === id);
+        return acc + (s ? s.duration : 0);
+    }, 0);
 
-    const addRow = () => setServiceRows(prev => [...prev, { id: '', key: Date.now() }]);
-    const removeRow = (key) => setServiceRows(prev => prev.filter(r => r.key !== key));
-    const updateRow = (key, id) => setServiceRows(prev => prev.map(r => r.key === key ? { ...r, id } : r));
+    const totalPrice = selectedServices.reduce((acc, id) => {
+        const s = services.find(sv => sv.id === id);
+        return acc + (s ? Number(s.price) : 0);
+    }, 0);
 
-    const handleSubmit = async (e) => {
+    const handleBook = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
+
         if (selectedServices.length === 0) {
             setError('Vui lòng chọn ít nhất 1 dịch vụ.');
+            return;
+        }
+        if (!selectedTime) {
+            setError('Vui lòng chọn giờ.');
             return;
         }
         if (!selectedChair) {
             setError('Vui lòng chọn ghế.');
             return;
         }
-        if (!date) {
-            setError('Vui lòng chọn ngày.');
-            return;
-        }
-        if (!selectedTime) {
-            setError('Vui lòng chọn khung giờ.');
-            return;
-        }
+
+        const startDateTime = new Date(`${date}T${selectedTime}`);
         setSubmitting(true);
         try {
-            await bookingAPI.create({
-                serviceIds: selectedServices.map(s => s.id),
-                startTime: new Date(`${date}T${selectedTime}`).toISOString(),
+            await addBooking({
+                serviceIds: selectedServices,
+                startTime: startDateTime.toISOString(),
                 chairId: parseInt(selectedChair),
-                barberId: selectedBarber ? parseInt(selectedBarber) : undefined,
-                note: silentBarber ? 'Yêu cầu barber im lặng trong lúc phục vụ' : '',
+                note: notes,
             });
-            setSuccess('Đặt lịch thành công! Chúng tôi sẽ liên hệ xác nhận sớm.');
-            setSelectedChair('');
-            setSelectedBarber('');
-            setServiceRows([{ id: '', key: Date.now() }]);
-            setDate('');
+            setSuccess('Đặt lịch thành công!');
+            setSelectedServices([]);
             setSelectedTime('');
-            setSilentBarber(false);
-            setGuestCount(1);
+            setSelectedChair('');
+            setNotes('');
+            await fetchBookings();
         } catch (err) {
-            setError(err.message || 'Đặt lịch thất bại. Vui lòng thử lại.');
+            setError(err.message || 'Đặt lịch thất bại.');
         } finally {
             setSubmitting(false);
         }
     };
 
-    const today = new Date().toISOString().split('T')[0];
+    const activeChairs = chairs.filter(c => c.isAvailable !== false);
+
+    // Kiểm tra giờ này có ghế nào trống không?
+    const isTimeSlotValid = (timeStr) => {
+        const dur = totalDuration || 30; // Mặc định 30p nếu chưa chọn dịch vụ
+        const startObj = new Date(`${date}T${timeStr}`);
+        const endObj = new Date(startObj.getTime() + dur * 60000);
+        
+        // Không cho đặt giờ trong quá khứ của ngày hôm nay
+        const now = new Date();
+        if (startObj <= now) return false;
+
+        // Tìm các booking bị trùng giờ
+        const busyChairIds = dailyBookings.filter(b => {
+            const bStart = new Date(b.startTime);
+            const bEnd = new Date(b.endTime);
+            // Có giao nhau về thời gian
+            return bStart < endObj && bEnd > startObj;
+        }).map(b => b.chairId);
+
+        // Xem còn bao nhiêu ghế trống
+        const availableCount = activeChairs.filter(c => !busyChairIds.includes(c.id)).length;
+        return availableCount > 0;
+    };
+
+    // Tìm danh sách ghế trồng cho khung giờ ĐÃ CHỌN
+    const busyChairIdsAtSelectedTime = selectedTime ? dailyBookings.filter(b => {
+        const startObj = new Date(`${date}T${selectedTime}`);
+        const endObj = new Date(startObj.getTime() + (totalDuration || 30) * 60000);
+        const bStart = new Date(b.startTime);
+        const bEnd = new Date(b.endTime);
+        return bStart < endObj && bEnd > startObj;
+    }).map(b => b.chairId) : [];
+
+    // Filter available chairs dynamically
+    const dynamicallyAvailableChairs = activeChairs.filter(c => !busyChairIdsAtSelectedTime.includes(c.id));
 
     return (
         <div className="bk-page">
-            <form className="bk-form" onSubmit={handleSubmit}>
-                <h2 className="bk-title">Đặt lịch</h2>
-                <p className="bk-subtitle">Quý khách vui lòng cho biết thông tin</p>
-                <p className="bk-required-note"><em>(*) Vui lòng nhập thông tin bắt buộc</em></p>
+            <form className="bk-form" onSubmit={handleBook}>
+                <div className="bk-title">Đặt lịch cắt tóc</div>
+                <div className="bk-subtitle">Vui lòng điền thông tin để đặt lịch</div>
+                <div className="bk-required-note">* Thông tin bắt buộc</div>
 
+                {/* THÔNG TIN */}
+                <div className="bk-section-label">Thông tin khách hàng</div>
+
+                <label className="bk-label">Họ và tên <span className="bk-req">*</span></label>
                 <div className="bk-field">
-                    <input className="bk-input" type="tel" placeholder="Số điện thoại *"
-                        value={phone} onChange={e => setPhone(e.target.value)} required />
+                    <input
+                        className="bk-input"
+                        type="text"
+                        defaultValue={user?.fullName || ''}
+                        placeholder="Nhập họ và tên"
+                        readOnly={!!user?.fullName}
+                    />
                 </div>
+
+                <label className="bk-label">Số điện thoại <span className="bk-req">*</span></label>
                 <div className="bk-field">
-                    <input className="bk-input" type="text" placeholder="Họ và tên *"
-                        value={fullName} onChange={e => setFullName(e.target.value)} required />
-                </div>
-                <div className="bk-field bk-guest-field">
-                    <label className="bk-label">Tổng số khách</label>
-                    <input className="bk-input bk-input-sm" type="number" min="1" max="10"
-                        value={guestCount} onChange={e => setGuestCount(e.target.value)} />
-                </div>
-
-                <div className="bk-section-label">Thông tin dịch vụ</div>
-
-                <label className="bk-label">Chọn ghế <span className="bk-req">*</span></label>
-                <div className="bk-chairs">
-                    {chairs.filter(c => c.isAvailable).length === 0 && (
-                        <p className="bk-empty">Chưa có ghế khả dụng</p>
-                    )}
-                    {chairs.filter(c => c.isAvailable).map(chair => (
-                        <label key={chair.id}
-                            className={`bk-chair-item ${selectedChair === String(chair.id) ? 'active' : ''}`}>
-                            <input type="radio" name="chair" value={chair.id}
-                                checked={selectedChair === String(chair.id)}
-                                onChange={() => setSelectedChair(String(chair.id))} />
-                            <span className="bk-chair-name">
-                                {chair.name}{chair.barber ? ` -- ${chair.barber.name}` : ''}
-                            </span>
-                            <span className="bk-pin">&#128205;</span>
-                        </label>
-                    ))}
+                    <input
+                        className="bk-input"
+                        type="tel"
+                        defaultValue={user?.phone || ''}
+                        placeholder="Nhập số điện thoại"
+                    />
                 </div>
 
-                <div className="bk-field">
-                    <label className="bk-label">Yêu cầu kỹ thuật viên <span className="bk-req">*</span></label>
-                    <div className="bk-select-wrap">
-                        <select className="bk-select" value={selectedBarber}
-                            onChange={e => setSelectedBarber(e.target.value)}>
-                            <option value="">Chọn kỹ thuật viên</option>
-                            {barbers.map(b => (
-                                <option key={b.id} value={b.id}>{b.name}</option>
-                            ))}
-                        </select>
-                        <span className="bk-select-arrow">&#8250;</span>
+                {/* DỊCH VỤ */}
+                <div className="bk-section-label">Dịch vụ <span className="bk-req">*</span></div>
+
+                {services.map(sv => (
+                    <div
+                        key={sv.id}
+                        className={`bk-chair-item${selectedServices.includes(sv.id) ? ' active' : ''}`}
+                        onClick={() => handleServiceToggle(sv.id)}
+                        style={{ cursor: 'pointer' }}
+                    >
+                        <input
+                            type="checkbox"
+                            checked={selectedServices.includes(sv.id)}
+                            onChange={() => handleServiceToggle(sv.id)}
+                        />
+                        <span className="bk-chair-name">{sv.name}</span>
+                        <span className="bk-pin">{sv.duration} phút • {Number(sv.price).toLocaleString('vi-VN')}đ</span>
                     </div>
-                </div>
+                ))}
 
-                <div className="bk-field">
-                    <label className="bk-label">Dịch vụ <span className="bk-req">*</span></label>
-                    {serviceRows.map((row) => (
-                        <div key={row.key} className="bk-service-row">
-                            <div className="bk-select-wrap" style={{ flex: 1 }}>
-                                <select className="bk-select" value={row.id}
-                                    onChange={e => updateRow(row.key, e.target.value)}>
-                                    <option value="">Chọn dịch vụ</option>
-                                    {services.map(s => (
-                                        <option key={s.id} value={s.id}>
-                                            {s.name} -- {Number(s.price).toLocaleString('vi-VN')}đ ({s.duration} phút)
-                                        </option>
-                                    ))}
-                                </select>
-                                <span className="bk-select-arrow">&#8250;</span>
-                            </div>
-                            {serviceRows.length > 1 && (
-                                <button type="button" className="bk-remove-btn"
-                                    onClick={() => removeRow(row.key)}>&#8854;</button>
-                            )}
+                {selectedServices.length > 0 && (
+                    <div className="bk-summary" style={{ marginTop: 14 }}>
+                        <div className="bk-summary-row">
+                            <span>Tổng thời gian:</span>
+                            <strong>{totalDuration} phút</strong>
                         </div>
-                    ))}
-                    <button type="button" className="bk-add-btn" onClick={addRow}>
-                        + Thêm dịch vụ
-                    </button>
-                </div>
-
-                <div className="bk-summary">
-                    <div className="bk-summary-row">
-                        <span>Tạm tính:</span>
-                        <strong><em>{totalPrice.toLocaleString('vi-VN')}đ</em></strong>
+                        <div className="bk-summary-row">
+                            <span>Tổng tiền:</span>
+                            <strong>{totalPrice.toLocaleString('vi-VN')}đ</strong>
+                        </div>
                     </div>
-                    <div className="bk-summary-row">
-                        <span>Tổng tiền:</span>
-                        <strong><em>{totalPrice.toLocaleString('vi-VN')}đ</em></strong>
-                    </div>
-                    <div className="bk-summary-row">
-                        <span>Thời lượng dự kiến:</span>
-                        <strong><em>{totalDuration} phút</em></strong>
-                    </div>
-                </div>
+                )}
 
-                <label className="bk-checkbox-label">
-                    <input type="checkbox" checked={silentBarber}
-                        onChange={e => setSilentBarber(e.target.checked)} />
-                    <span>Yêu cầu barber im lặng trong lúc phục vụ</span>
-                </label>
-
+                {/* NGÀY */}
+                <div className="bk-section-label">Ngày hẹn <span className="bk-req">*</span></div>
                 <div className="bk-field">
-                    <label className="bk-label">Ngày đặt lịch <span className="bk-req">*</span></label>
-                    <input className="bk-input" type="date" min={today}
-                        value={date} onChange={e => setDate(e.target.value)} required />
+                    <input
+                        className="bk-input"
+                        type="date"
+                        value={date}
+                        onChange={e => {
+                            setDate(e.target.value);
+                            setSelectedTime(''); // Reset time when date changes
+                            setSelectedChair('');
+                        }}
+                        required
+                    />
                 </div>
 
-                <div className="bk-field">
-                    <label className="bk-label">Chọn khung giờ dịch vụ <span className="bk-req">*</span></label>
-                    <div className="bk-time-grid">
-                        {TIME_SLOTS.map(slot => (
-                            <button key={slot} type="button"
-                                className={`bk-time-btn ${selectedTime === slot ? 'active' : ''}`}
-                                onClick={() => setSelectedTime(slot)}>
-                                {slot}
+                {/* GIỜ */}
+                <div className="bk-section-label">Giờ hẹn <span className="bk-req">*</span></div>
+                <div className="bk-time-grid">
+                    {TIME_SLOTS.map(t => {
+                        const valid = isTimeSlotValid(t);
+                        return (
+                            <button
+                                key={t}
+                                type="button"
+                                disabled={!valid}
+                                className={`bk-time-btn${selectedTime === t ? ' active' : ''}${!valid ? ' disabled' : ''}`}
+                                onClick={() => {
+                                    if(valid) {
+                                        setSelectedTime(t);
+                                        setSelectedChair(''); // Reset chair when time changes
+                                    }
+                                }}
+                                style={!valid ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#f0f0f0', color: '#999' } : {}}
+                            >
+                                {t}
                             </button>
-                        ))}
+                        );
+                    })}
+                </div>
+
+                {/* GHẾ */}
+                <div className="bk-section-label">Chọn ghế <span className="bk-req">*</span></div>
+                {!selectedTime ? (
+                    <div className="bk-empty" style={{ color: '#888' }}>Vui lòng chọn giờ hẹn trước để xem trạng thái ghế.</div>
+                ) : dynamicallyAvailableChairs.length === 0 ? (
+                    <div className="bk-empty" style={{ color: '#d9534f', fontWeight: 'bold' }}>Hết ghế trống vào lúc {selectedTime} (Thời lượng: {totalDuration||30} phút). Vui lòng chọn giờ khác.</div>
+                ) : (
+                    <div className="bk-chairs">
+                        {activeChairs.map(chair => {
+                            const isBusy = busyChairIdsAtSelectedTime.includes(chair.id);
+                            return (
+                                <label
+                                    key={chair.id}
+                                    className={`bk-chair-item${selectedChair === String(chair.id) ? ' active' : ''}${isBusy ? ' disabled' : ''}`}
+                                    style={isBusy ? { opacity: 0.5, cursor: 'not-allowed', backgroundColor: '#f9f9f9' } : {}}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="chair"
+                                        value={chair.id}
+                                        checked={selectedChair === String(chair.id)}
+                                        disabled={isBusy}
+                                        onChange={() => !isBusy && setSelectedChair(String(chair.id))}
+                                    />
+                                    <span className="bk-chair-name">
+                                        {chair.name} {isBusy && <span style={{ color: 'red', fontSize: '0.8rem' }}>(Đã có khách hẹn)</span>}
+                                    </span>
+                                    {chair.barber && (
+                                        <span className="bk-pin">📍 {chair.barber.name}</span>
+                                    )}
+                                </label>
+                            );
+                        })}
                     </div>
+                )}
+
+                {/* GHI CHÚ */}
+                <div className="bk-section-label">Ghi chú</div>
+                <div className="bk-field">
+                    <input
+                        className="bk-input"
+                        type="text"
+                        value={notes}
+                        onChange={e => setNotes(e.target.value)}
+                        placeholder="Yêu cầu đặc biệt (không bắt buộc)"
+                    />
                 </div>
 
                 {error && <div className="bk-error">{error}</div>}

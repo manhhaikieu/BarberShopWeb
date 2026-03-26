@@ -46,11 +46,18 @@ const createBooking = async (req, res) => {
     if (totalActiveBookings >= totalChairs)
       return res.status(409).json({ message: 'Tiệm đã đầy lịch tại thời điểm này' });
 
+    // Tự động tìm thợ của ghế này nếu không có barberId truyền lên
+    let finalBarberId = barberId || null;
+    if (!finalBarberId) {
+       const assignedBarber = await Barber.findOne({ where: { chairId } });
+       if (assignedBarber) finalBarberId = assignedBarber.id;
+    }
+
     // 5. Tạo booking
     const booking = await Booking.create({
       userId: req.user.id,
       chairId,
-      barberId: barberId || null,
+      barberId: finalBarberId,
       startTime: start,
       endTime: end,
       totalPrice,
@@ -167,4 +174,24 @@ const cancelBooking = async (req, res) => {
   }
 };
 
-module.exports = { createBooking, getAllBookings, getMyBookings, getBookingById, updateBookingStatus, cancelBooking };
+const getBusySlots = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ message: 'Thiếu tham số date' });
+    const day = new Date(date);
+    const nextDay = new Date(day);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const bookings = await Booking.findAll({
+      where: {
+        startTime: { [Op.between]: [day, nextDay] },
+        status: { [Op.notIn]: ['cancelled'] },
+      },
+      attributes: ['id', 'startTime', 'endTime', 'chairId'],
+    });
+    return res.json({ bookings });
+  } catch (err) {
+    return res.status(500).json({ message: 'Lỗi server', error: err.message });
+  }
+};
+
+module.exports = { createBooking, getAllBookings, getMyBookings, getBookingById, updateBookingStatus, cancelBooking, getBusySlots };
