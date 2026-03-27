@@ -81,24 +81,27 @@ const BarberSchedulePage = () => {
                         {new Date(date).toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </p>
                 </div>
-                <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-                    Tổng: <strong>{schedule.filter(b => b.status !== 'cancelled').length}</strong> lịch &nbsp;|&nbsp;
-                    Hoàn thành: <strong style={{ color: '#10b981' }}>{schedule.filter(b => b.status === 'completed').length}</strong> &nbsp;|&nbsp;
-                    Doanh thu: <strong style={{ color: '#1b3a2d' }}>{formatCurrency(totalRevenue)}</strong>
-                </div>
             </div>
 
-            {/* Date navigation */}
-            <div className="date-toolbar">
-                <button className="btn-refresh" onClick={() => changeDay(-1)}>◀ Hôm trước</button>
-                <input
-                    type="date"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                />
-                <button className="btn-refresh" onClick={() => changeDay(1)}>Hôm sau ▶</button>
-                <button className="btn-refresh" onClick={goToday} style={{ background: '#4caf7d' }}>Hôm nay</button>
-                <button className="btn-refresh" onClick={fetchSchedule} style={{ background: '#6b7280' }}>↻ Làm mới</button>
+            {/* Date navigation & Stats */}
+            <div className="date-toolbar" style={{ justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <button className="btn-refresh" onClick={() => changeDay(-1)}>◀ Hôm trước</button>
+                    <input
+                        type="date"
+                        value={date}
+                        onChange={e => setDate(e.target.value)}
+                    />
+                    <button className="btn-refresh" onClick={() => changeDay(1)}>Hôm sau ▶</button>
+                    <button className="btn-refresh" onClick={goToday} style={{ background: '#4caf7d' }}>Hôm nay</button>
+                    <button className="btn-refresh" onClick={fetchSchedule} style={{ background: '#6b7280' }}>↻ Làm mới</button>
+                </div>
+                
+                <div style={{ fontSize: '0.95rem', color: '#4b5563', padding: '8px 16px', background: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #e5e7eb' }}>
+                    Tổng: <strong>{schedule.filter(b => b.status !== 'cancelled').length}</strong> lịch &nbsp;|&nbsp;
+                    Hoàn thành: <strong style={{ color: '#10b981' }}>{schedule.filter(b => b.status === 'completed').length}</strong> &nbsp;|&nbsp;
+                    Doanh thu: <strong style={{ color: '#1b3a2d', fontSize: '1.05rem' }}>{formatCurrency(totalRevenue)}</strong>
+                </div>
             </div>
 
             {error && <div style={{ color: '#ef4444', marginBottom: 16 }}>{error}</div>}

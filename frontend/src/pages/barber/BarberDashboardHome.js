@@ -9,15 +9,16 @@ const BarberDashboardHome = () => {
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
 
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
         return () => clearInterval(timer);
     }, []);
 
     useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
         setLoading(true);
-        barberAPI.getMySchedule(today)
+        barberAPI.getMySchedule('')
             .then(data => {
                 setBarberInfo(data.barber);
                 setTodaySchedule(data.schedule || []);
@@ -26,16 +27,54 @@ const BarberDashboardHome = () => {
             .finally(() => setLoading(false));
     }, []);
 
+    // Filter today's schedule for the tables and daily stats
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todaysBookings = todaySchedule.filter(b => b.startTime.startsWith(todayStr));
+
     const statusCount = {
-        pending: todaySchedule.filter(b => b.status === 'pending').length,
-        confirmed: todaySchedule.filter(b => b.status === 'confirmed').length,
-        completed: todaySchedule.filter(b => b.status === 'completed').length,
-        cancelled: todaySchedule.filter(b => b.status === 'cancelled').length,
+        pending: todaysBookings.filter(b => b.status === 'pending').length,
+        confirmed: todaysBookings.filter(b => b.status === 'confirmed').length,
+        completed: todaysBookings.filter(b => b.status === 'completed').length,
+        cancelled: todaysBookings.filter(b => b.status === 'cancelled').length,
     };
 
-    const todayRevenue = todaySchedule
-        .filter(b => b.status === 'completed')
-        .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0);
+    // Revenue calculations
+    const revenueDate = new Date(selectedDate);
+    const startOfDay = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), revenueDate.getDate());
+    
+    // Start of week (Monday)
+    const dayOfWeek = revenueDate.getDay() || 7; 
+    const startOfWeek = new Date(startOfDay);
+    startOfWeek.setDate(startOfDay.getDate() - dayOfWeek + 1);
+    
+    // Start of month
+    const startOfMonth = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), 1);
+    
+    // Start of year
+    const startOfYear = new Date(revenueDate.getFullYear(), 0, 1);
+
+    const completedBookings = todaySchedule.filter(b => b.status === 'completed');
+
+    const revenues = {
+        day: completedBookings
+            .filter(b => new Date(b.startTime) >= startOfDay && new Date(b.startTime) < new Date(startOfDay.getTime() + 86400000))
+            .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0),
+        week: completedBookings
+            .filter(b => new Date(b.startTime) >= startOfWeek && new Date(b.startTime) < new Date(startOfWeek.getTime() + 7 * 86400000))
+            .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0),
+        month: completedBookings
+            .filter(b => new Date(b.startTime).getMonth() === revenueDate.getMonth() && new Date(b.startTime).getFullYear() === revenueDate.getFullYear())
+            .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0),
+        year: completedBookings
+            .filter(b => new Date(b.startTime).getFullYear() === revenueDate.getFullYear())
+            .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0)
+    };
+
+    const isToday = selectedDate === todayStr;
+    const labelDay = isToday ? 'Hôm nay' : `Ngày ${selectedDate.split('-').reverse().join('/')}`;
+    const labelWeek = isToday ? 'Tuần này' : 'Tuần chọn';
+    const labelMonth = isToday ? 'Tháng này' : `Tháng ${revenueDate.getMonth() + 1}`;
+    const labelYear = isToday ? 'Năm nay' : `Năm ${revenueDate.getFullYear()}`;
 
     const formatCurrency = (amount) =>
         new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -51,22 +90,21 @@ const BarberDashboardHome = () => {
         return diff > 0 && diff <= 10 * 60 * 1000;
     };
 
-    const upcoming = todaySchedule
+    const upcoming = todaysBookings
         .filter(b => b.status !== 'cancelled' && new Date(b.endTime) > currentTime)
         .slice(0, 6);
 
     const handleStatusUpdate = async (bookingId, newStatus) => {
         try {
             await bookingAPI.updateStatus(bookingId, newStatus);
-            const today = new Date().toISOString().split('T')[0];
-            const data = await barberAPI.getMySchedule(today);
+            const data = await barberAPI.getMySchedule('');
             setTodaySchedule(data.schedule || []);
         } catch (err) {
             alert('Cập nhật thất bại: ' + err.message);
         }
     };
 
-    const today = new Date().toLocaleDateString('vi-VN', {
+    const todayDateFormatted = new Date().toLocaleDateString('vi-VN', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
 
@@ -75,7 +113,7 @@ const BarberDashboardHome = () => {
             <div className="barber-page-header">
                 <div>
                     <h1>Tổng quan</h1>
-                    <p>{today}</p>
+                    <p>{todayDateFormatted}</p>
                 </div>
                 {barberInfo && (
                     <div style={{ fontSize: '0.9rem', color: '#6b7280' }}>
@@ -89,27 +127,55 @@ const BarberDashboardHome = () => {
                 <p style={{ color: '#9ca3af' }}>Đang tải dữ liệu...</p>
             ) : (
                 <>
-                    {/* Stats */}
-                    <div className="barber-stat-grid">
+                    {/* Status Stats (Today) */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <h2 style={{ fontSize: '1.05rem', margin: 0, color: '#1b3a2d' }}>Lịch hẹn hôm nay</h2>
+                    </div>
+                    <div className="barber-stat-grid" style={{ marginBottom: '24px' }}>
                         <div className="barber-stat-card yellow">
                             <div className="barber-stat-label">Chờ xác nhận</div>
                             <div className="barber-stat-value">{statusCount.pending}</div>
-                            <div className="barber-stat-sub">lịch hẹn hôm nay</div>
                         </div>
                         <div className="barber-stat-card blue">
                             <div className="barber-stat-label">Đã xác nhận</div>
                             <div className="barber-stat-value">{statusCount.confirmed}</div>
-                            <div className="barber-stat-sub">lịch hẹn hôm nay</div>
                         </div>
                         <div className="barber-stat-card green">
                             <div className="barber-stat-label">Hoàn thành</div>
                             <div className="barber-stat-value">{statusCount.completed}</div>
-                            <div className="barber-stat-sub">lịch hẹn hôm nay</div>
                         </div>
-                        <div className="barber-stat-card green">
-                            <div className="barber-stat-label">Doanh thu hôm nay</div>
-                            <div className="barber-stat-value" style={{ fontSize: '1.2rem' }}>{formatCurrency(todayRevenue)}</div>
-                            <div className="barber-stat-sub">từ {statusCount.completed} lịch hoàn thành</div>
+                        <div className="barber-stat-card red">
+                            <div className="barber-stat-label">Đã hủy</div>
+                            <div className="barber-stat-value">{statusCount.cancelled}</div>
+                        </div>
+                    </div>
+
+                    {/* Revenue Stats */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                        <h2 style={{ fontSize: '1.05rem', margin: 0, color: '#1b3a2d' }}>Doanh thu</h2>
+                        <input 
+                            type="date" 
+                            value={selectedDate} 
+                            onChange={e => setSelectedDate(e.target.value)}
+                            style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '0.9rem', outline: 'none' }}
+                        />
+                    </div>
+                    <div className="barber-stat-grid" style={{ marginBottom: '28px' }}>
+                        <div className="barber-stat-card" style={{ borderLeftColor: '#4caf7d' }}>
+                            <div className="barber-stat-label">{labelDay}</div>
+                            <div className="barber-stat-value" style={{ fontSize: '1.25rem', color: '#10b981' }}>{formatCurrency(revenues.day)}</div>
+                        </div>
+                        <div className="barber-stat-card" style={{ borderLeftColor: '#4caf7d' }}>
+                            <div className="barber-stat-label">{labelWeek}</div>
+                            <div className="barber-stat-value" style={{ fontSize: '1.25rem', color: '#10b981' }}>{formatCurrency(revenues.week)}</div>
+                        </div>
+                        <div className="barber-stat-card" style={{ borderLeftColor: '#4caf7d' }}>
+                            <div className="barber-stat-label">{labelMonth}</div>
+                            <div className="barber-stat-value" style={{ fontSize: '1.25rem', color: '#10b981' }}>{formatCurrency(revenues.month)}</div>
+                        </div>
+                        <div className="barber-stat-card" style={{ borderLeftColor: '#4caf7d' }}>
+                            <div className="barber-stat-label">{labelYear}</div>
+                            <div className="barber-stat-value" style={{ fontSize: '1.25rem', color: '#10b981' }}>{formatCurrency(revenues.year)}</div>
                         </div>
                     </div>
 
