@@ -147,6 +147,16 @@ export const productAPI = {
     }).then(handleResponse),
 };
 
+// ── Product Orders ────────────────────────────────────
+export const productOrderAPI = {
+  create: (data) =>
+    fetch(`${BASE_URL}/product-orders`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+};
+
 // ── Upload ────────────────────────────────────────────
 export const uploadAPI = {
   uploadProductImage: (file) => {

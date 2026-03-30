@@ -19,7 +19,7 @@ const register = async (req, res) => {
     const user = await User.create({ username, email, password: hashedPassword, fullName, phone, role: assignedRole });
     return res.status(201).json({
       message: 'Đăng ký thành công',
-      user: { id: user.id, username: user.username, email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role, phone: user.phone },
     });
   } catch (err) {
     return res.status(500).json({ message: 'Lỗi server', error: err.message });
@@ -47,7 +47,7 @@ const login = async (req, res) => {
 
     return res.json({
       token,
-      user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName, role: user.role, permissions },
+      user: { id: user.id, username: user.username, email: user.email, fullName: user.fullName, phone: user.phone, role: user.role, permissions },
     });
   } catch (err) {
     return res.status(500).json({ message: 'Lỗi server', error: err.message });

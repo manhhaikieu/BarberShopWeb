@@ -24,4 +24,27 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-module.exports = { authenticate };
+const optionalAuthenticate = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id, {
+      attributes: { exclude: ['password'] },
+    });
+    if (user) {
+      req.user = user;
+      req.permissions = decoded.permissions || [];
+    }
+    next();
+  } catch (err) {
+    // If token is invalid, just proceed as guest
+    next();
+  }
+};
+
+module.exports = { authenticate, optionalAuthenticate };
