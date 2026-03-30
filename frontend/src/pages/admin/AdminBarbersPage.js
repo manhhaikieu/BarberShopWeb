@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
-import { authAPI } from '../../api/apiService';
+import { authAPI, uploadAPI } from '../../api/apiService';
 import './AdminLayout.css';
 
 const AdminBarbersPage = () => {
@@ -9,16 +9,18 @@ const AdminBarbersPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [current, setCurrent] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [error, setError] = useState('');
     const [staffUsers, setStaffUsers] = useState([]);
     const [search, setSearch] = useState('');
+    const fileInputRef = React.useRef(null);
 
     useEffect(() => {
         authAPI.getStaffUsers().then(res => setStaffUsers(res.staff || [])).catch(console.error);
     }, []);
 
     const openAdd = () => {
-        setCurrent({ name: '', experienceYears: 0, phone: '', chairId: '', userId: '' });
+        setCurrent({ name: '', experienceYears: 0, phone: '', chairId: '', userId: '', avatar: '' });
         setIsModalOpen(true);
         setError('');
     };
@@ -38,6 +40,20 @@ const AdminBarbersPage = () => {
         }
     };
 
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const data = await uploadAPI.uploadProductImage(file);
+            setCurrent(prev => ({ ...prev, avatar: `http://localhost:5000${data.imageUrl}` }));
+        } catch (err) {
+            setError('Upload ảnh thất bại: ' + (err.message || ''));
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -49,6 +65,7 @@ const AdminBarbersPage = () => {
                 phone: current.phone,
                 chairId: current.chairId ? parseInt(current.chairId) : null,
                 userId: current.userId ? parseInt(current.userId) : null,
+                avatar: current.avatar || null,
             };
             if (current.id) {
                 await updateBarber(current.id, payload);
@@ -118,13 +135,17 @@ const AdminBarbersPage = () => {
                                         <td style={{ color: '#aaa', fontSize: '0.82rem' }}>{idx + 1}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <div style={{
-                                                    width: 36, height: 36, background: '#1a1a2e',
-                                                    borderRadius: '50%', display: 'flex', alignItems: 'center',
-                                                    justifyContent: 'center', color: '#d4af37', fontWeight: 800, fontSize: '1rem'
-                                                }}>
-                                                    {barber.name?.[0]?.toUpperCase()}
-                                                </div>
+                                                {barber.avatar ? (
+                                                    <img src={barber.avatar} alt={barber.name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{
+                                                        width: 36, height: 36, background: '#1a1a2e',
+                                                        borderRadius: '50%', display: 'flex', alignItems: 'center',
+                                                        justifyContent: 'center', color: '#d4af37', fontWeight: 800, fontSize: '1rem'
+                                                    }}>
+                                                        {barber.name?.[0]?.toUpperCase()}
+                                                    </div>
+                                                )}
                                                 <span style={{ fontWeight: 600 }}>{barber.name}</span>
                                             </div>
                                         </td>
@@ -212,9 +233,25 @@ const AdminBarbersPage = () => {
                                     </select>
                                 </div>
                             </div>
+                            <div className="form-group">
+                                <label>Ảnh đại diện (Avatar)</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={fileInputRef}
+                                    onChange={handleImageUpload}
+                                    style={{ padding: '6px 0' }}
+                                />
+                                {uploading && <small style={{ color: '#888' }}>Đang upload...</small>}
+                            </div>
+                            {current.avatar && (
+                                <div className="form-group">
+                                    <img src={current.avatar} alt="preview" className="img-upload-preview" />
+                                </div>
+                            )}
                             <div className="modal-actions">
                                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Hủy</button>
-                                <button type="submit" className="btn-save" disabled={saving}>
+                                <button type="submit" className="btn-save" disabled={saving || uploading}>
                                     {saving ? 'Đang lưu...' : 'Lưu'}
                                 </button>
                             </div>
