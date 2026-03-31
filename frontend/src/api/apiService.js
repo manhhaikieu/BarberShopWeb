@@ -147,6 +147,33 @@ export const productAPI = {
     }).then(handleResponse),
 };
 
+// ── Product Orders ────────────────────────────────────
+export const productOrderAPI = {
+  create: (data) =>
+    fetch(`${BASE_URL}/product-orders`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  getAll: () =>
+    fetch(`${BASE_URL}/product-orders`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
+
+  getMyOrders: () =>
+    fetch(`${BASE_URL}/product-orders/my-orders`, {
+      headers: getHeaders(),
+    }).then(handleResponse),
+
+  updateStatus: (id, status) =>
+    fetch(`${BASE_URL}/product-orders/${id}/status`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ status }),
+    }).then(handleResponse),
+};
+
 // ── Upload ────────────────────────────────────────────
 export const uploadAPI = {
   uploadProductImage: (file) => {

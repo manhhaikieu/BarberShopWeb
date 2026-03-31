@@ -1,6 +1,8 @@
-﻿import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../hooks/DataContext';
+import { useAuth } from '../hooks/AuthContext';
+import { productOrderAPI } from '../api/apiService';
 import './HomePage.css';
 
 import service1 from '../assets/images/service_1.jpg';
@@ -11,9 +13,52 @@ import tho1 from '../assets/images/tho1.jpg';
 import tho2 from '../assets/images/tho2.png';
 
 const HomePage = () => {
-    const { products } = useData();
+    const { products, barbers } = useData();
     const teamImages = [tho1, tho2, tho1, tho2, tho1];
     const featuredProducts = products.slice(0, 8);
+    const { user } = useAuth();
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showCheckout, setShowCheckout] = useState(false);
+    
+    // Khởi tạo mặc định nếu có user thì dùng fullName và phone của user
+    const defaultOrderData = { 
+        customerName: user ? (user.fullName || user.username) : '', 
+        customerPhone: user ? (user.phone || '') : '', 
+        address: '', 
+        quantity: 1 
+    };
+    
+    const [orderData, setOrderData] = useState(defaultOrderData);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleOrderSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setIsSubmitting(true);
+            await productOrderAPI.create({
+                productId: selectedProduct.id,
+                ...orderData
+            });
+            alert('Đặt hàng thành công! Đơn hàng của bạn đang được xử lý.');
+            setSelectedProduct(null);
+            setShowCheckout(false);
+        } catch (err) {
+            alert(err.message || 'Có lỗi xảy ra khi đặt hàng!');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleOpenModal = (product) => {
+        setSelectedProduct(product);
+        setShowCheckout(false);
+        setOrderData(defaultOrderData);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedProduct(null);
+        setShowCheckout(false);
+    };
 
     return (
         <div className="home-wrapper">
@@ -93,9 +138,16 @@ const HomePage = () => {
                     <p>Là những người thợ có Tâm & được đào tạo bài bản.</p>
                 </div>
                 <div className="team-grid">
-                    {teamImages.map((img, index) => (
+                    {barbers && barbers.length > 0 ? barbers.map((barber) => (
+                        <div key={barber.id} className="team-member">
+                            <div className="member-img" style={{ backgroundImage: `url(${barber.avatar || tho1})`, backgroundSize: 'cover', backgroundPosition: 'center', flex: 1 }}></div>
+                            <div style={{ textAlign: 'center', padding: '15px 10px', fontWeight: 'bold', fontSize: '1.2rem', color: '#1a1a2e', backgroundColor: '#fff', borderTop: '2px solid #d4af37' }}>
+                                {barber.name}
+                            </div>
+                        </div>
+                    )) : teamImages.map((img, index) => (
                         <div key={index} className="team-member">
-                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', height: '100%' }}></div>
+                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', flex: 1 }}></div>
                         </div>
                     ))}
                 </div>
@@ -116,7 +168,7 @@ const HomePage = () => {
                 ) : (
                     <div className="gallery-grid">
                         {featuredProducts.map(product => (
-                            <div key={product.id} className="product-card">
+                            <div key={product.id} className="product-card" onClick={() => handleOpenModal(product)}>
                                 <div className="product-card-img">
                                     {product.imageUrl ? (
                                         <img src={product.imageUrl} alt={product.name} />
@@ -133,6 +185,59 @@ const HomePage = () => {
                     </div>
                 )}
             </section>
+
+            {/* Modal Chi tiết Sản Phẩm */}
+            {selectedProduct && (
+                <div className="product-modal-overlay" onClick={handleCloseModal}>
+                    <div className="product-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="product-modal-close" onClick={handleCloseModal}>×</button>
+                        <div className="product-modal-body">
+                            <div className="product-modal-img">
+                                {selectedProduct.imageUrl ? (
+                                    <img src={selectedProduct.imageUrl} alt={selectedProduct.name} />
+                                ) : (
+                                    <div className="product-modal-no-img">📦</div>
+                                )}
+                            </div>
+                            <div className="product-modal-info">
+                                <h3>{selectedProduct.name}</h3>
+                                <div className="product-modal-price">{Number(selectedProduct.price).toLocaleString('vi-VN')}đ</div>
+                                <div className="product-modal-category">Danh mục: {selectedProduct.category || 'Khác'}</div>
+                                {!showCheckout ? (
+                                    <>
+                                        <p className="product-modal-desc">{selectedProduct.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
+                                        <button className="btn-buy-now" onClick={() => setShowCheckout(true)}>
+                                            MUA NGAY
+                                        </button>
+                                    </>
+                                ) : (
+                                    <form onSubmit={handleOrderSubmit} className="checkout-form">
+                                        <div className="form-group">
+                                            <input required placeholder="Họ và tên" value={orderData.customerName} onChange={e => setOrderData({...orderData, customerName: e.target.value})} />
+                                        </div>
+                                        <div className="form-group">
+                                            <input required type="tel" placeholder="Số điện thoại" value={orderData.customerPhone} onChange={e => setOrderData({...orderData, customerPhone: e.target.value})} />
+                                        </div>
+                                        <div className="form-group">
+                                            <textarea required placeholder="Địa chỉ nhận hàng" value={orderData.address} onChange={e => setOrderData({...orderData, address: e.target.value})}></textarea>
+                                        </div>
+                                        <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <label style={{ margin: 0 }}>Số lượng:</label>
+                                            <input required type="number" min="1" max={selectedProduct.stockQuantity || 100} value={orderData.quantity} onChange={e => setOrderData({...orderData, quantity: parseInt(e.target.value)})} style={{ width: '80px' }} />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                                            <button type="button" className="btn-cancel" onClick={() => setShowCheckout(false)} style={{ flex: 1, padding: '12px', background: '#e0e0e0', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Quay lại</button>
+                                            <button type="submit" className="btn-buy-now" disabled={isSubmitting} style={{ flex: 2, padding: '12px' }}>
+                                                {isSubmitting ? 'Đang xử lý...' : 'XÁC NHẬN ĐẶT'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

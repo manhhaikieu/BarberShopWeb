@@ -11,6 +11,7 @@ const productRoutes = require('./src/routes/products');
 const barberRoutes = require('./src/routes/barbers');
 const chairRoutes = require('./src/routes/chairs');
 const uploadRoutes = require('./src/routes/upload');
+const productOrderRoutes = require('./src/routes/productOrders');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/barbers', barberRoutes);
 app.use('/api/chairs', chairRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/product-orders', productOrderRoutes);
 
 // ── Health check ───────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -46,7 +48,7 @@ sequelize
     .authenticate()
     .then(() => {
         console.log('✅ Database kết nối thành công');
-        return sequelize.sync({ alter: false });
+        return sequelize.sync({ alter: true });
     })
     .then(() => {
         app.listen(PORT, () => {

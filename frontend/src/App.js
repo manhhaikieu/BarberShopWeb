@@ -11,6 +11,8 @@ import RegisterPage from './pages/RegisterPage';
 import BookingPage from './pages/BookingPage';
 import ProductPage from './pages/ProductPage';
 import StaffPage from './pages/StaffPage';
+import MyOrdersPage from './pages/MyOrdersPage';
+import MyBookingsPage from './pages/MyBookingsPage';
 import BarberDashboardHome from './pages/barber/BarberDashboardHome';
 import BarberSchedulePage from './pages/barber/BarberSchedulePage';
 import BarberProfilePage from './pages/barber/BarberProfilePage';
@@ -20,6 +22,7 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminServicesPage from './pages/admin/AdminServicesPage';
 import AdminChairsPage from './pages/admin/AdminChairsPage';
 import AdminBookingsPage from './pages/admin/AdminBookingsPage';
+import AdminProductOrdersPage from './pages/admin/AdminProductOrdersPage';
 import './themes/theme.css';
 
 // Redirect admin/staff ra khỏi trang public
@@ -58,6 +61,26 @@ function App() {
                 <Layout>
                   <PrivateRoute requiredClaim={PERMISSIONS.CREATE_BOOKING} customerOnly>
                     <BookingPage />
+                  </PrivateRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-orders"
+              element={
+                <Layout>
+                  <PrivateRoute customerOnly>
+                    <MyOrdersPage />
+                  </PrivateRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-bookings"
+              element={
+                <Layout>
+                  <PrivateRoute customerOnly>
+                    <MyBookingsPage />
                   </PrivateRoute>
                 </Layout>
               }
@@ -111,6 +134,14 @@ function App() {
               element={
                 <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_PRODUCTS} adminOnly>
                   <AdminProductsPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/product-orders"
+              element={
+                <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_PRODUCTS} adminOnly>
+                  <AdminProductOrdersPage />
                 </PrivateRoute>
               }
             />

@@ -8,6 +8,7 @@ const Booking = require('./Booking')(sequelize);
 const BookingService = require('./BookingService')(sequelize);
 const Product = require('./Product')(sequelize);
 const ProductSale = require('./ProductSale')(sequelize);
+const ProductOrder = require('./ProductOrder')(sequelize);
 
 // ── Quan hệ Chair ──────────────────────────────────────
 Chair.hasOne(Barber, { foreignKey: 'chairId', as: 'barber' });
@@ -44,6 +45,13 @@ ProductSale.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 User.hasMany(ProductSale, { foreignKey: 'userId', as: 'productSales' });
 ProductSale.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// ── Quan hệ ProductOrder ──────────────────────────────
+Product.hasMany(ProductOrder, { foreignKey: 'productId', as: 'orders' });
+ProductOrder.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+User.hasMany(ProductOrder, { foreignKey: 'userId', as: 'productOrders' });
+ProductOrder.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   sequelize,
   User,
@@ -54,4 +62,5 @@ module.exports = {
   BookingService,
   Product,
   ProductSale,
+  ProductOrder,
 };
