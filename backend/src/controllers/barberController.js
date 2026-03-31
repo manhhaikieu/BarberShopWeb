@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
 const { Op } = require('sequelize');
-const { Barber, Chair, Booking, Service } = require('../models');
+const { Barber, Chair, Booking, Service, User } = require('../models');
 
 const getAllBarbers = async (req, res) => {
   try {
-    const barbers = await Barber.findAll({ include: [{ model: Chair, as: 'chair' }], order: [['name', 'ASC']] });
+    const barbers = await Barber.findAll({ include: [{ model: Chair, as: 'chair' }, { model: User, as: 'user', attributes: ['id', 'username', 'email'] }], order: [['name', 'ASC']] });
     return res.json({ barbers });
   } catch (err) {
     return res.status(500).json({ message: 'Lỗi server', error: err.message });
@@ -13,7 +13,7 @@ const getAllBarbers = async (req, res) => {
 
 const getBarberById = async (req, res) => {
   try {
-    const barber = await Barber.findByPk(req.params.id, { include: [{ model: Chair, as: 'chair' }] });
+    const barber = await Barber.findByPk(req.params.id, { include: [{ model: Chair, as: 'chair' }, { model: User, as: 'user', attributes: ['id', 'username', 'email'] }] });
     if (!barber) return res.status(404).json({ message: 'Thợ không tồn tại' });
     return res.json({ barber });
   } catch (err) {
@@ -90,7 +90,7 @@ const getBarberSchedule = async (req, res) => {
 const getMySchedule = async (req, res) => {
   try {
     const { date } = req.query;
-    const barber = await Barber.findOne({ where: { userId: req.user.id } });
+    const barber = await Barber.findOne({ where: { userId: req.user.id }, include: [{ model: Chair, as: 'chair' }] });
     if (!barber) return res.status(404).json({ message: 'Tài khoản này chưa được liên kết với hồ sơ thợ nào' });
 
     const where = { barberId: barber.id };

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { register, login, getProfile, getStaffUsers } = require('../controllers/authController');
+const { register, login, getProfile, getStaffUsers, updateProfile } = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 const { requirePermission } = require('../middleware/permissions');
 
@@ -17,6 +17,11 @@ router.post('/login', [
 ], login);
 
 router.get('/profile', authenticate, getProfile);
+router.put('/profile', authenticate, [
+  body('username').notEmpty().withMessage('Username không được để trống'),
+  body('email').isEmail().withMessage('Email không hợp lệ'),
+  body('fullName').notEmpty().withMessage('Họ tên không được để trống')
+], updateProfile);
 router.get('/staff-users', authenticate, requirePermission('ManageBarber'), getStaffUsers);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useData } from '../hooks/DataContext';
 import { uploadAPI } from '../api/apiService';
-import './AdminPages.css';
+import '../styles/pages/AdminPages.css';
 
 const ProductPage = () => {
     const { products, addProduct, updateProduct, deleteProduct } = useData();

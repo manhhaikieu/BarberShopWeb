@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { productOrderAPI } from '../api/apiService';
 import { useAuth } from '../hooks/AuthContext';
-import './MyOrdersPage.css';
+import '../styles/pages/MyOrdersPage.css';
 
 const STATUS_LABELS = { 
     Pending: 'Chờ Xác Nhận', 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
 import { bookingAPI } from '../../api/apiService';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const AdminDashboard = () => {
     const { barbers, products, services, chairs } = useData();
@@ -11,7 +11,9 @@ const AdminDashboard = () => {
     const [loadingBookings, setLoadingBookings] = useState(true);
 
     useEffect(() => {
-        const today = new Date().toISOString().split('T')[0];
+        const d = new Date();
+        const p = n => n.toString().padStart(2, '0');
+        const today = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
         bookingAPI.getAll({ date: today })
             .then(res => setTodayBookings(res.bookings || []))
             .catch(console.error)
@@ -168,8 +170,10 @@ const AdminDashboard = () => {
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1a1a2e', marginBottom: '16px' }}>⚡ Truy cập nhanh</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                     {[
+                        { to: '/admin/revenue', label: 'Quản lý Doanh thu', icon: '💰' },
                         { to: '/admin/barbers', label: 'Quản lý Thợ', icon: '👨‍💼' },
                         { to: '/admin/products', label: 'Quản lý Sản phẩm', icon: '📦' },
+                        { to: '/admin/product-orders', label: 'Quản lý Đơn hàng', icon: '🛒' },
                         { to: '/admin/services', label: 'Quản lý Dịch vụ', icon: '✂️' },
                         { to: '/admin/chairs', label: 'Quản lý Ghế', icon: '💺' },
                         { to: '/admin/bookings', label: 'Quản lý Lịch hẹn', icon: '📅' },

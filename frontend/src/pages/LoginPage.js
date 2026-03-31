@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
-import './LoginPage.css';
+import '../styles/pages/LoginPage.css';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -64,10 +64,7 @@ const LoginPage = () => {
                 <div className="login-register-link">
                     <small>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></small>
                 </div>
-                <div className="login-tips">
-                    <small>Admin: admin@barbershop.com / admin123</small><br />
-                    <small>Staff: staff1@barbershop.com / staff123</small>
-                </div>
+
             </div>
         </div>
     );

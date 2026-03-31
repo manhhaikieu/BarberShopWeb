@@ -125,6 +125,7 @@
 .footer-col h2 {
     font-family: var(--font-heading);
     margin-bottom: 20px;
+    color: var(--accent-gold);
 }
 
 .footer-col.center {

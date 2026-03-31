@@ -48,7 +48,7 @@ sequelize
     .authenticate()
     .then(() => {
         console.log('✅ Database kết nối thành công');
-        return sequelize.sync({ alter: true });
+        return sequelize.sync();
     })
     .then(() => {
         app.listen(PORT, () => {

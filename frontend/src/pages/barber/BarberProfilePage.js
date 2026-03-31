@@ -1,21 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import BarberLayout from './BarberLayout';
-import { barberAPI } from '../../api/apiService';
+import { barberAPI, authAPI } from '../../api/apiService';
 import { useAuth } from '../../hooks/AuthContext';
-import './BarberLayout.css';
+import '../../styles/pages/barber/BarberLayout.css';
 
 const BarberProfilePage = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [barberInfo, setBarberInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({ fullName: '', email: '', username: '' });
+    const [saving, setSaving] = useState(false);
+
     useEffect(() => {
-        barberAPI.getMySchedule(new Date().toISOString().split('T')[0])
+        const getLocalToday = () => {
+            const d = new Date();
+            const p = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+        };
+
+        if (user) {
+            setFormData({ fullName: user.fullName || '', email: user.email || '', username: user.username || '' });
+        }
+        barberAPI.getMySchedule(getLocalToday())
             .then(data => setBarberInfo(data.barber))
             .catch(err => setError(err.message || 'Không tải được hồ sơ'))
             .finally(() => setLoading(false));
-    }, []);
+    }, [user]);
+
+    const handleSave = async () => {
+        setSaving(true);
+        setError('');
+        try {
+            const data = await authAPI.updateProfile(formData);
+            updateUser(data.user);
+            setIsEditing(false);
+            alert('Cập nhật thành công!');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     return (
         <BarberLayout>
@@ -32,19 +60,42 @@ const BarberProfilePage = () => {
             {!loading && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, maxWidth: 900 }}>
                     {/* Thông tin tài khoản */}
-                    <div className="barber-card">
-                        <h2>👤 Tài khoản đăng nhập</h2>
+                    <div className="barber-card" style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h2>👤 Tài khoản đăng nhập</h2>
+                            {!isEditing ? (
+                                <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', color: '#d4af37', cursor: 'pointer', fontWeight: 'bold' }}>✏️ Sửa</button>
+                            ) : (
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button onClick={() => setIsEditing(false)} style={{ background: '#333', color: 'white', border: 'none', padding: '4px 10px', borderRadius: 4, cursor: 'pointer' }}>Hủy</button>
+                                    <button onClick={handleSave} disabled={saving} style={{ background: '#d4af37', color: 'black', border: 'none', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>{saving ? '...' : 'Lưu'}</button>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="profile-row">
                             <span className="profile-label">Họ tên</span>
-                            <span className="profile-value">{user?.fullName || '—'}</span>
+                            {isEditing ? (
+                                <input type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} style={{ flex: 1, padding: '4px 8px' }} />
+                            ) : (
+                                <span className="profile-value">{user?.fullName || '—'}</span>
+                            )}
                         </div>
                         <div className="profile-row">
                             <span className="profile-label">Email</span>
-                            <span className="profile-value">{user?.email || '—'}</span>
+                            {isEditing ? (
+                                <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ flex: 1, padding: '4px 8px' }} />
+                            ) : (
+                                <span className="profile-value">{user?.email || '—'}</span>
+                            )}
                         </div>
                         <div className="profile-row">
                             <span className="profile-label">Username</span>
-                            <span className="profile-value">{user?.username || '—'}</span>
+                            {isEditing ? (
+                                <input type="text" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} style={{ flex: 1, padding: '4px 8px' }} />
+                            ) : (
+                                <span className="profile-value">{user?.username || '—'}</span>
+                            )}
                         </div>
                         <div className="profile-row">
                             <span className="profile-label">Vai trò</span>
@@ -87,20 +138,7 @@ const BarberProfilePage = () => {
                         )}
                     </div>
 
-                    {/* Quyền hạn */}
-                    <div className="barber-card" style={{ gridColumn: '1 / -1' }}>
-                        <h2>🔑 Quyền truy cập</h2>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {(user?.permissions || []).map(p => (
-                                <span key={p} style={{
-                                    background: '#d1fae5', color: '#065f46',
-                                    padding: '4px 14px', borderRadius: 20, fontSize: '0.82rem', fontWeight: 600
-                                }}>
-                                    {p}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
+
                 </div>
             )}
         </BarberLayout>

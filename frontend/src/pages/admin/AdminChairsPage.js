@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const AdminChairsPage = () => {
     const { chairs, barbers, addChair, updateChair, deleteChair } = useData();

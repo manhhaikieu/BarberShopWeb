@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { bookingAPI } from '../api/apiService';
 import { useAuth } from '../hooks/AuthContext';
-import './MyOrdersPage.css'; // Reusing styles from order history
+import '../styles/pages/MyOrdersPage.css'; // Reusing styles from order history
 
 const STATUS_LABELS = { 
     pending: 'Chờ Xác Nhận', 

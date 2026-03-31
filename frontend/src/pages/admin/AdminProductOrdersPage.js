@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
 import { productOrderAPI } from '../../api/apiService';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const STATUS_OPTIONS = ['Pending', 'Confirmed', 'Shipped', 'Completed', 'Cancelled'];
 const STATUS_LABELS = { 

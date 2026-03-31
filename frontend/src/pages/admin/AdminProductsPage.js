@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
 import { uploadAPI } from '../../api/apiService';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const CATEGORIES = ['Pomade', 'Dầu gội', 'Sáp', 'Serum', 'Dưỡng da', 'Phụ kiện', 'Khác'];
 

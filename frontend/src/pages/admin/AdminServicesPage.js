@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const AdminServicesPage = () => {
     const { services, addService, updateService, deleteService } = useData();

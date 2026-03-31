@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from './AdminLayout';
 import { useData } from '../../hooks/DataContext';
 import { authAPI, uploadAPI } from '../../api/apiService';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const AdminBarbersPage = () => {
     const { barbers, chairs, addBarber, updateBarber, deleteBarber } = useData();

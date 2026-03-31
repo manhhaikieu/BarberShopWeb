@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
 import { bookingAPI } from '../../api/apiService';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'completed', 'cancelled'];
 const STATUS_LABELS = { pending: 'Chờ XN', confirmed: 'Đã XN', completed: 'Hoàn thành', cancelled: 'Đã hủy' };
@@ -9,7 +9,12 @@ const STATUS_LABELS = { pending: 'Chờ XN', confirmed: 'Đã XN', completed: 'H
 const AdminBookingsPage = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+    const getLocalToday = () => {
+        const d = new Date();
+        const p = n => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    };
+    const [filterDate, setFilterDate] = useState(getLocalToday());
     const [filterStatus, setFilterStatus] = useState('');
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [updatingId, setUpdatingId] = useState(null);

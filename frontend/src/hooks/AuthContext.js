@@ -43,8 +43,14 @@ export const AuthProvider = ({ children }) => {
         return user.role === role.toLowerCase();
     };
 
+    const updateUser = (newUserData) => {
+        const updated = { ...user, ...newUserData };
+        setUser(updated);
+        localStorage.setItem('barber_user', JSON.stringify(updated));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, hasClaim, hasRole }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, hasClaim, hasRole, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

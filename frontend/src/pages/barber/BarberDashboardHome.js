@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BarberLayout from './BarberLayout';
 import { barberAPI, bookingAPI } from '../../api/apiService';
-import './BarberLayout.css';
+import '../../styles/pages/barber/BarberLayout.css';
 
 const BarberDashboardHome = () => {
     const [barberInfo, setBarberInfo] = useState(null);
@@ -9,7 +9,13 @@ const BarberDashboardHome = () => {
     const [loading, setLoading] = useState(true);
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const getLocalToday = () => {
+        const d = new Date();
+        const p = n => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    };
+
+    const [selectedDate, setSelectedDate] = useState(getLocalToday());
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000);
@@ -28,7 +34,7 @@ const BarberDashboardHome = () => {
     }, []);
 
     // Filter today's schedule for the tables and daily stats
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalToday();
     const todaysBookings = todaySchedule.filter(b => b.startTime.startsWith(todayStr));
 
     const statusCount = {

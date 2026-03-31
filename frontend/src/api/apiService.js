@@ -41,6 +41,13 @@ export const authAPI = {
     fetch(`${BASE_URL}/auth/staff-users`, {
       headers: getHeaders(),
     }).then(handleResponse),
+
+  updateProfile: (data) =>
+    fetch(`${BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
 };
 
 // ── Services ──────────────────────────────────────────

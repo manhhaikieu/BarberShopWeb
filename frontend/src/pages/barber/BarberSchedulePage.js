@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import BarberLayout from './BarberLayout';
 import { barberAPI, bookingAPI } from '../../api/apiService';
-import './BarberLayout.css';
+import '../../styles/pages/barber/BarberLayout.css';
 
 const STATUS_LABELS = { pending: 'Chờ XN', confirmed: 'Đã XN', completed: 'Hoàn thành', cancelled: 'Đã hủy' };
 
 const BarberSchedulePage = () => {
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    const getLocalToday = () => {
+        const d = new Date();
+        const p = n => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    };
+
+    const [date, setDate] = useState(getLocalToday());
     const [schedule, setSchedule] = useState([]);
     const [barberInfo, setBarberInfo] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -63,7 +69,7 @@ const BarberSchedulePage = () => {
         .filter(b => b.status === 'completed')
         .reduce((sum, b) => sum + parseFloat(b.totalPrice || 0), 0);
 
-    const goToday = () => setDate(new Date().toISOString().split('T')[0]);
+    const goToday = () => setDate(getLocalToday());
 
     const changeDay = (offset) => {
         const d = new Date(date);
