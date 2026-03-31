@@ -1,0 +1,6 @@
+node_modules/
+.env
+barbershop.sqlite
+*.sqlite
+uploads/*
+!uploads/.gitkeep

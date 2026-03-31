@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { CLAIMS } from '../data/mockData';
-import './Layout.css';
+import '../styles/components/Layout.css';
 
 const Layout = ({ children }) => {
     const { user, logout, hasClaim } = useAuth();

@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
-import { CLAIMS } from '../api/mockData';
-import './Layout.css';
+import '../styles/templates/Layout.css';
 
 const Layout = ({ children }) => {
-    const { user, logout, hasClaim } = useAuth();
+    const { user, logout, hasClaim, hasRole } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -37,21 +36,36 @@ const Layout = ({ children }) => {
 
                 <nav className="main-nav">
                     <Link to="/" className={isActive('/')}>Home</Link>
-                    <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
 
-                    {/* Admin/Staff Links (Hidden for Customers) */}
-                    {hasClaim(CLAIMS.MANAGE_PRODUCTS) && (
-                        <Link to="/products" className={isActive('/products')}>Sản Phẩm</Link>
+                    {/* Nav dành cho customer/staff – ẩn với admin */}
+                    {!hasRole('admin') && (
+                        <Link to="/booking" className={isActive('/booking')}>Đặt Lịch</Link>
                     )}
 
-                    {hasClaim(CLAIMS.MANAGE_STAFF) && (
-                        <Link to="/staff" className={isActive('/staff')}>Thợ</Link>
+                    {/* Staff dashboard – chỉ hiện với staff */}
+                    {user?.role === 'staff' && (
+                        <Link to="/barber" className={isActive('/barber')}>Lịch của tôi</Link>
+                    )}
+
+                    {/* Admin Panel link – nếu admin lạc vào Layout thì có link quay lại */}
+                    {hasRole('admin') && (
+                        <Link to="/admin" style={{ color: '#d4af37', fontWeight: 800 }}>
+                            ⚙️ Về trang Admin
+                        </Link>
+                    )}
+
+                    {/* Menu cá nhân - đặt bên phải cùng trước nút Profile/Logout */}
+                    {user && !hasRole('admin') && (
+                        <>
+                            <Link to="/my-bookings" className={isActive('/my-bookings')}>Lịch Của Tôi</Link>
+                            <Link to="/my-orders" className={isActive('/my-orders')}>Đơn Hàng Của Tôi</Link>
+                        </>
                     )}
 
                     {/* User State */}
                     {user ? (
                         <span className="nav-user-action" onClick={handleLogout}>
-                            Logout ({user.name})
+                            Logout ({user.fullName || user.username})
                         </span>
                     ) : (
                         <Link to="/login" className="nav-user-action">Login</Link>

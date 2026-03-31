@@ -1,188 +1,210 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
-import { SEATS } from '../api/mockData';
-import './BookingPage.css';
+import { bookingAPI } from '../api/apiService';
+import '../styles/pages/BookingPage.css';
+
+const TIME_SLOTS = [];
+for (let h = 9; h <= 19; h++) {
+    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`);
+    if (h < 19) TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`);
+}
 
 const BookingPage = () => {
-    const { services, bookings, addBooking } = useData();
+    const { services, chairs, addBooking, fetchBookings } = useData();
     const { user } = useAuth();
 
-    // State
     const [selectedServices, setSelectedServices] = useState([]);
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [time, setTime] = useState('09:00');
-    const [selectedSeat, setSelectedSeat] = useState('');
+    const [selectedTime, setSelectedTime] = useState('');
+    const [selectedChair, setSelectedChair] = useState('');
+    const [notes, setNotes] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [dailyBookings, setDailyBookings] = useState([]);
 
-    // Derived State
-    const totalDuration = selectedServices.reduce((acc, currId) => {
-        const service = services.find(s => s.id === currId);
-        return acc + (service ? service.duration : 0);
-    }, 0);
-
-    const totalPrice = selectedServices.reduce((acc, currId) => {
-        const service = services.find(s => s.id === currId);
-        return acc + (service ? service.price : 0);
-    }, 0);
+    useEffect(() => {
+        if (!date) return;
+        bookingAPI.getBusySlots(date)
+            .then(res => setDailyBookings(res.bookings || []))
+            .catch(err => console.error('Lỗi lấy lịch bận:', err));
+    }, [date, success]);
 
     const handleServiceToggle = (id) => {
-        if (selectedServices.includes(id)) {
-            setSelectedServices(selectedServices.filter(s => s !== id));
-        } else {
-            setSelectedServices([...selectedServices, id]);
-        }
+        setSelectedServices(prev =>
+            prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+        );
     };
 
-    const handleBook = (e) => {
+    const totalDuration = selectedServices.reduce((acc, id) => {
+        const s = services.find(sv => sv.id === id);
+        return acc + (s ? s.duration : 0);
+    }, 0);
+
+    const totalPrice = selectedServices.reduce((acc, id) => {
+        const s = services.find(sv => sv.id === id);
+        return acc + (s ? Number(s.price) : 0);
+    }, 0);
+
+    const handleBook = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
-        if (selectedServices.length === 0) {
-            setError('Please select at least one service.');
-            return;
+        if (selectedServices.length === 0) { setError('Vui lòng chọn ít nhất 1 dịch vụ.'); return; }
+        if (!selectedTime) { setError('Vui lòng chọn giờ.'); return; }
+        if (!selectedChair) { setError('Vui lòng chọn ghế.'); return; }
+
+        const startDateTime = new Date(`${date}T${selectedTime}`);
+        setSubmitting(true);
+        try {
+            await addBooking({
+                serviceIds: selectedServices,
+                startTime: startDateTime.toISOString(),
+                chairId: parseInt(selectedChair),
+                note: notes,
+            });
+            setSuccess('Đặt lịch thành công!');
+            setSelectedServices([]);
+            setSelectedTime('');
+            setSelectedChair('');
+            setNotes('');
+            await fetchBookings();
+        } catch (err) {
+            setError(err.message || 'Đặt lịch thất bại.');
+        } finally {
+            setSubmitting(false);
         }
-        if (!selectedSeat) {
-            setError('Please select a seat.');
-            return;
-        }
-
-        // Calculate Time Ranges
-        const startDateTime = new Date(`${date}T${time}`);
-        const endDateTime = new Date(startDateTime.getTime() + totalDuration * 60000);
-
-        // Check Availability
-        const isConflict = bookings.some(booking => {
-            if (booking.seatId !== parseInt(selectedSeat) || booking.date !== date) return false;
-
-            const bStart = new Date(booking.startTime);
-            const bEnd = new Date(booking.endTime);
-
-            // Overlap check
-            return (startDateTime < bEnd && endDateTime > bStart);
-        });
-
-        if (isConflict) {
-            setError('This seat is already booked for the selected time range.');
-            return;
-        }
-
-        // Create Booking
-        const newBooking = {
-            userId: user.id,
-            userName: user.name,
-            serviceIds: selectedServices,
-            seatId: parseInt(selectedSeat),
-            date: date,
-            startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
-            totalPrice: totalPrice,
-            status: 'Confirmed'
-        };
-
-        addBooking(newBooking);
-        setSuccess('Booking successfully confirmed!');
-        // Reset form slightly
-        setSelectedServices([]);
     };
 
+    const activeChairs = chairs.filter(c => c.isAvailable !== false);
+
+    const isTimeSlotValid = (timeStr) => {
+        const dur = totalDuration || 30;
+        const startObj = new Date(`${date}T${timeStr}`);
+        const endObj = new Date(startObj.getTime() + dur * 60000);
+        if (startObj <= new Date()) return false;
+        const busyChairIds = dailyBookings.filter(b => {
+            const bStart = new Date(b.startTime);
+            const bEnd = new Date(b.endTime);
+            return bStart < endObj && bEnd > startObj;
+        }).map(b => b.chairId);
+        return activeChairs.filter(c => !busyChairIds.includes(c.id)).length > 0;
+    };
+
+    const busyChairIdsAtSelectedTime = selectedTime ? dailyBookings.filter(b => {
+        const startObj = new Date(`${date}T${selectedTime}`);
+        const endObj = new Date(startObj.getTime() + (totalDuration || 30) * 60000);
+        const bStart = new Date(b.startTime);
+        const bEnd = new Date(b.endTime);
+        return bStart < endObj && bEnd > startObj;
+    }).map(b => b.chairId) : [];
+
+    const dynamicallyAvailableChairs = activeChairs.filter(c => !busyChairIdsAtSelectedTime.includes(c.id));
+
     return (
-        <div className="booking-container">
-            <h2>Book a Service</h2>
+        <div className="bk-page">
+            <div className="bk-wrapper">
+                <div className="bk-header">
+                    <h1 className="bk-title">Đặt lịch <span>cắt tóc</span></h1>
+                    <p className="bk-subtitle">Chọn dịch vụ, ngày giờ và ghế phù hợp — chúng tôi sẽ lo phần còn lại.</p>
+                </div>
 
-            <div className="booking-grid">
-                {/* Left Column: Form */}
-                <div className="booking-form-section">
-                    <form onSubmit={handleBook}>
-                        <div className="section-title">1. Choose Services</div>
-                        <div className="services-list">
-                            {services.map(service => (
-                                <div
-                                    key={service.id}
-                                    className={`service-item ${selectedServices.includes(service.id) ? 'selected' : ''}`}
-                                    onClick={() => handleServiceToggle(service.id)}
-                                >
-                                    <div className="service-info">
-                                        <div className="service-name">{service.name}</div>
-                                        <div className="service-meta">{service.duration} mins • {service.price.toLocaleString()} đ</div>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedServices.includes(service.id)}
-                                        readOnly
-                                    />
+                <form onSubmit={handleBook}>
+                    <div className="bk-body">
+                        <div className="bk-col-left">
+                            <div className="bk-card">
+                                <div className="bk-card-title">👤 Thông tin khách hàng</div>
+                                <div className="bk-field">
+                                    <label className="bk-label">Họ và tên</label>
+                                    <input className="bk-input" type="text" defaultValue={user?.fullName || ''} placeholder="Nhập họ và tên" readOnly={!!user?.fullName} />
                                 </div>
-                            ))}
-                        </div>
-
-                        <div className="section-title">2. Choose Date & Time</div>
-                        <div className="datetime-controls">
-                            <div className="form-group half">
-                                <label>Date</label>
-                                <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
+                                <div className="bk-field">
+                                    <label className="bk-label">Số điện thoại</label>
+                                    <input className="bk-input" type="tel" defaultValue={user?.phone || ''} placeholder="Nhập số điện thoại" />
+                                </div>
                             </div>
-                            <div className="form-group half">
-                                <label>Start Time</label>
-                                <input type="time" value={time} onChange={e => setTime(e.target.value)} required />
-                            </div>
-                        </div>
 
-                        <div className="section-title">3. Choose Seat</div>
-                        <div className="form-group">
-                            <label>Seat Selection</label>
-                            <select value={selectedSeat} onChange={e => setSelectedSeat(e.target.value)} required>
-                                <option value="">-- Select a Seat --</option>
-                                {SEATS.map(seat => (
-                                    <option key={seat.id} value={seat.id}>{seat.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="booking-summary">
-                            <div className="summary-row">
-                                <span>Total Duration:</span>
-                                <strong>{totalDuration} mins</strong>
-                            </div>
-                            <div className="summary-row">
-                                <span>Total Price:</span>
-                                <strong>{totalPrice.toLocaleString()} đ</strong>
-                            </div>
-                        </div>
-
-                        {error && <div className="error-msg">{error}</div>}
-                        {success && <div className="success-msg">{success}</div>}
-
-                        <button type="submit" className="btn-book">Confirm Booking</button>
-                    </form>
-                </div>
-
-                {/* Right Column: Existing Bookings (For visibility) */}
-                <div className="booking-info-section">
-                    <h3>Today's Schedule ({date})</h3>
-                    {bookings.filter(b => b.date === date).length === 0 ? (
-                        <p className="no-bookings">No bookings for this date yet.</p>
-                    ) : (
-                        <div className="bookings-list">
-                            {bookings
-                                .filter(b => b.date === date)
-                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                                .map(b => (
-                                    <div key={b.id} className="booking-card">
-                                        <div className="booking-time">
-                                            {new Date(b.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
-                                            {new Date(b.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            <div className="bk-card">
+                                <div className="bk-card-title">✂️ Dịch vụ</div>
+                                <div className="bk-service-list">
+                                    {services.map(sv => (
+                                        <div key={sv.id} className={`bk-service-item${selectedServices.includes(sv.id) ? ' active' : ''}`} onClick={() => handleServiceToggle(sv.id)}>
+                                            <input className="bk-service-check" type="checkbox" checked={selectedServices.includes(sv.id)} onChange={() => handleServiceToggle(sv.id)} />
+                                            <span className="bk-service-name">{sv.name}</span>
+                                            <span className="bk-service-meta">{sv.duration} phút · {Number(sv.price).toLocaleString('vi-VN')}đ</span>
                                         </div>
-                                        <div className="booking-details">
-                                            <strong>{SEATS.find(s => s.id === b.seatId)?.name}</strong>
-                                            <div>{b.userName}</div>
-                                        </div>
+                                    ))}
+                                </div>
+                                {selectedServices.length > 0 && (
+                                    <div className="bk-summary">
+                                        <div className="bk-summary-row"><span>Tổng thời gian</span><strong>{totalDuration} phút</strong></div>
+                                        <div className="bk-summary-row"><span>Tổng tiền</span><strong>{totalPrice.toLocaleString('vi-VN')}đ</strong></div>
                                     </div>
-                                ))}
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
+
+                        <div className="bk-col-right">
+                            <div className="bk-card">
+                                <div className="bk-card-title">📅 Ngày & Giờ hẹn</div>
+                                <div className="bk-field">
+                                    <label className="bk-label">Ngày hẹn</label>
+                                    <input className="bk-input" type="date" value={date} min={new Date().toISOString().split('T')[0]} onChange={e => { setDate(e.target.value); setSelectedTime(''); setSelectedChair(''); }} required />
+                                </div>
+                                <div className="bk-field">
+                                    <label className="bk-label">Khung giờ</label>
+                                    <div className="bk-time-grid">
+                                        {TIME_SLOTS.map(t => {
+                                            const valid = isTimeSlotValid(t);
+                                            return (
+                                                <button key={t} type="button" disabled={!valid} className={`bk-time-btn${selectedTime === t ? ' active' : ''}${!valid ? ' disabled' : ''}`} onClick={() => { if (valid) { setSelectedTime(t); setSelectedChair(''); } }}>{t}</button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bk-card">
+                                <div className="bk-card-title">💺 Chọn ghế</div>
+                                {!selectedTime ? (
+                                    <p className="bk-hint">Vui lòng chọn giờ hẹn trước để xem trạng thái ghế.</p>
+                                ) : dynamicallyAvailableChairs.length === 0 ? (
+                                    <p className="bk-no-slots">Hết ghế trống lúc {selectedTime}. Vui lòng chọn giờ khác.</p>
+                                ) : (
+                                    <div className="bk-chair-list">
+                                        {activeChairs.map(chair => {
+                                            const isBusy = busyChairIdsAtSelectedTime.includes(chair.id);
+                                            return (
+                                                <label key={chair.id} className={`bk-chair-item${selectedChair === String(chair.id) ? ' active' : ''}${isBusy ? ' disabled' : ''}`}>
+                                                    <input className="bk-chair-radio" type="radio" name="chair" value={chair.id} checked={selectedChair === String(chair.id)} disabled={isBusy} onChange={() => !isBusy && setSelectedChair(String(chair.id))} />
+                                                    <span className="bk-chair-name">{chair.name}</span>
+                                                    {chair.barber && <span className="bk-chair-barber">{chair.barber.name}</span>}
+                                                    {isBusy && <span className="bk-busy-badge">Đã có khách</span>}
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bk-card">
+                                <div className="bk-card-title">📝 Ghi chú</div>
+                                <div className="bk-field">
+                                    <input className="bk-input" type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Yêu cầu đặc biệt (không bắt buộc)" />
+                                </div>
+                            </div>
+
+                            {error && <div className="bk-error">{error}</div>}
+                            {success && <div className="bk-success">{success}</div>}
+
+                            <button type="submit" className="bk-submit" disabled={submitting}>
+                                {submitting ? 'Đang đặt lịch...' : 'Xác nhận đặt lịch'}
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     );
