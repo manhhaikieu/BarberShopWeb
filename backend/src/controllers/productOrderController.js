@@ -73,3 +73,18 @@ exports.updateProductOrderStatus = async (req, res) => {
         res.status(500).json({ message: 'Lỗi server', error: err.message });
     }
 };
+
+// Lấy danh sách đơn hàng của một người dùng cụ thể
+exports.getMyProductOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await ProductOrder.findAll({
+            where: { userId },
+            include: [{ model: Product, as: 'product' }],
+            order: [['createdAt', 'DESC']]
+        });
+        res.status(200).json(orders);
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi server', error: err.message });
+    }
+};

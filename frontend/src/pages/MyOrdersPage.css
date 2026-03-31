@@ -1,0 +1,144 @@
+.my-orders-container {
+    padding: 60px 20px;
+    background-color: #fcfcfc;
+    min-height: calc(100vh - 250px);
+}
+
+.my-orders-container .section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.my-orders-container .section-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+
+.my-orders-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.loading-state, .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 15px 0 10px;
+}
+
+.empty-state p {
+    color: #888;
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.order-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #f0f0f0;
+}
+
+.order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.order-header {
+    background: #fafafa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-id {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #d4af37;
+}
+
+.order-status.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.order-body {
+    padding: 20px;
+}
+
+.order-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    border-bottom: 1px dashed #f0f0f0;
+    padding-bottom: 12px;
+}
+
+.order-info-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.info-label {
+    color: #888;
+    font-weight: 600;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 500;
+    text-align: right;
+    max-width: 65%;
+}
+
+.info-value.product-name {
+    font-weight: 700;
+}
+
+.info-value.amount {
+    color: #d4af37;
+    font-weight: 700;
+}
+
+.address-text {
+    line-height: 1.4;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+    .orders-grid {
+        grid-template-columns: 1fr;
+    }
+}

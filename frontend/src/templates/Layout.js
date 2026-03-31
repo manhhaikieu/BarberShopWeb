@@ -43,7 +43,7 @@ const Layout = ({ children }) => {
                     )}
 
                     {/* Staff dashboard – chỉ hiện với staff */}
-                    {hasClaim('ViewBooking') && !hasClaim('ManageBooking') && (
+                    {user?.role === 'staff' && (
                         <Link to="/barber" className={isActive('/barber')}>Lịch của tôi</Link>
                     )}
 
@@ -52,6 +52,14 @@ const Layout = ({ children }) => {
                         <Link to="/admin" style={{ color: '#d4af37', fontWeight: 800 }}>
                             ⚙️ Về trang Admin
                         </Link>
+                    )}
+
+                    {/* Menu cá nhân - đặt bên phải cùng trước nút Profile/Logout */}
+                    {user && !hasRole('admin') && (
+                        <>
+                            <Link to="/my-bookings" className={isActive('/my-bookings')}>Lịch Của Tôi</Link>
+                            <Link to="/my-orders" className={isActive('/my-orders')}>Đơn Hàng Của Tôi</Link>
+                        </>
                     )}
 
                     {/* User State */}

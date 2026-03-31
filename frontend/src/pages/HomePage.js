@@ -13,7 +13,7 @@ import tho1 from '../assets/images/tho1.jpg';
 import tho2 from '../assets/images/tho2.png';
 
 const HomePage = () => {
-    const { products } = useData();
+    const { products, barbers } = useData();
     const teamImages = [tho1, tho2, tho1, tho2, tho1];
     const featuredProducts = products.slice(0, 8);
     const { user } = useAuth();
@@ -138,9 +138,16 @@ const HomePage = () => {
                     <p>Là những người thợ có Tâm & được đào tạo bài bản.</p>
                 </div>
                 <div className="team-grid">
-                    {teamImages.map((img, index) => (
+                    {barbers && barbers.length > 0 ? barbers.map((barber) => (
+                        <div key={barber.id} className="team-member">
+                            <div className="member-img" style={{ backgroundImage: `url(${barber.avatar || tho1})`, backgroundSize: 'cover', backgroundPosition: 'center', flex: 1 }}></div>
+                            <div style={{ textAlign: 'center', padding: '15px 10px', fontWeight: 'bold', fontSize: '1.2rem', color: '#1a1a2e', backgroundColor: '#fff', borderTop: '2px solid #d4af37' }}>
+                                {barber.name}
+                            </div>
+                        </div>
+                    )) : teamImages.map((img, index) => (
                         <div key={index} className="team-member">
-                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', height: '100%' }}></div>
+                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', flex: 1 }}></div>
                         </div>
                     ))}
                 </div>

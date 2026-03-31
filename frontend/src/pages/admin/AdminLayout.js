@@ -33,6 +33,9 @@ const AdminLayout = ({ children }) => {
                     <NavLink to="/admin/products" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
                         <span className="nav-icon">📦</span> Quản lý Sản phẩm
                     </NavLink>
+                    <NavLink to="/admin/product-orders" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
+                        <span className="nav-icon">🛒</span> Quản lý Đơn hàng
+                    </NavLink>
                     <NavLink to="/admin/services" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
                         <span className="nav-icon">✂️</span> Quản lý Dịch vụ
                     </NavLink>
