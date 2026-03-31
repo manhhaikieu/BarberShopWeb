@@ -3,18 +3,16 @@ import { Link } from 'react-router-dom';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
 import { productOrderAPI } from '../api/apiService';
-import './HomePage.css';
+import '../styles/pages/HomePage.css';
 
 import service1 from '../assets/images/service_1.jpg';
 import goidau from '../assets/images/goidau.jpg';
 import sapvuottoc from '../assets/images/sapvuottoc.png';
 import barbershop from '../assets/images/barbershop.jpg';
 import tho1 from '../assets/images/tho1.jpg';
-import tho2 from '../assets/images/tho2.png';
 
 const HomePage = () => {
     const { products, barbers } = useData();
-    const teamImages = [tho1, tho2, tho1, tho2, tho1];
     const featuredProducts = products.slice(0, 8);
     const { user } = useAuth();
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -145,11 +143,11 @@ const HomePage = () => {
                                 {barber.name}
                             </div>
                         </div>
-                    )) : teamImages.map((img, index) => (
-                        <div key={index} className="team-member">
-                            <div className="member-img" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center', flex: 1 }}></div>
+                    )) : (
+                        <div style={{ width: '100%', textAlign: 'center', padding: '40px 0', color: '#888', fontStyle: 'italic' }}>
+                            Đang cập nhật đội ngũ thợ cắt tóc...
                         </div>
-                    ))}
+                    )}
                 </div>
             </section>
 
@@ -160,10 +158,8 @@ const HomePage = () => {
                     <p>Khám phá những sản phẩm mới nhất & đang thịnh hành.</p>
                 </div>
                 {featuredProducts.length === 0 ? (
-                    <div className="gallery-grid">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                            <div key={i} className="gallery-item placeholder"></div>
-                        ))}
+                    <div style={{ width: '100%', textAlign: 'center', padding: '40px 0', color: '#888', fontStyle: 'italic' }}>
+                        Đang cập nhật danh sách sản phẩm nổi bật...
                     </div>
                 ) : (
                     <div className="gallery-grid">

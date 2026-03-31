@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/AuthContext';
-import './BarberLayout.css';
+import '../../styles/pages/barber/BarberLayout.css';
 
 const BarberLayout = ({ children }) => {
     const { user, logout } = useAuth();

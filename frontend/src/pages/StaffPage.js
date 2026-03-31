@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
 import { authAPI } from '../api/apiService';
-import './AdminPages.css';
+import '../styles/pages/AdminPages.css';
 
 const StaffPage = () => {
     const { barbers, addBarber, updateBarber, deleteBarber, chairs } = useData();

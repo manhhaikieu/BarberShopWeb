@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../hooks/DataContext';
 import { useAuth } from '../hooks/AuthContext';
 import { bookingAPI } from '../api/apiService';
-import './BookingPage.css';
+import '../styles/pages/BookingPage.css';
 
 const TIME_SLOTS = [];
 for (let h = 9; h <= 19; h++) {

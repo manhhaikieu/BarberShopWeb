@@ -23,6 +23,7 @@ import AdminServicesPage from './pages/admin/AdminServicesPage';
 import AdminChairsPage from './pages/admin/AdminChairsPage';
 import AdminBookingsPage from './pages/admin/AdminBookingsPage';
 import AdminProductOrdersPage from './pages/admin/AdminProductOrdersPage';
+import AdminRevenuePage from './pages/admin/AdminRevenuePage';
 import './themes/theme.css';
 
 // Redirect admin/staff ra khỏi trang public
@@ -166,6 +167,14 @@ function App() {
               element={
                 <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_BOOKING} adminOnly>
                   <AdminBookingsPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin/revenue"
+              element={
+                <PrivateRoute requiredClaim={PERMISSIONS.MANAGE_BOOKING} adminOnly>
+                  <AdminRevenuePage />
                 </PrivateRoute>
               }
             />

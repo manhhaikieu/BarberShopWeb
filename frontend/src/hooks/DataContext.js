@@ -50,20 +50,21 @@ export const DataProvider = ({ children }) => {
         } catch (err) { console.error('Fetch chairs:', err); }
     }, []);
 
-    // Auto-fetch khi đăng nhập, clear khi đăng xuất
+    // Auto-fetch data
+    useEffect(() => {
+        setLoading(true);
+        Promise.all([fetchServices(), fetchProducts(), fetchBarbers(), fetchChairs()])
+            .finally(() => setLoading(false));
+    }, [fetchServices, fetchProducts, fetchBarbers, fetchChairs]);
+
+    // Lấy dữ liệu cá nhân khi đăng nhập
     useEffect(() => {
         if (user) {
-            setLoading(true);
-            Promise.all([fetchServices(), fetchProducts(), fetchBarbers(), fetchBookings(), fetchChairs()])
-                .finally(() => setLoading(false));
+            fetchBookings();
         } else {
-            setServices([]);
-            setProducts([]);
-            setBarbers([]);
             setBookings([]);
-            setChairs([]);
         }
-    }, [user, fetchServices, fetchProducts, fetchBarbers, fetchBookings, fetchChairs]);
+    }, [user, fetchBookings]);
 
     // Product CRUD
     const addProduct = async (productData) => {

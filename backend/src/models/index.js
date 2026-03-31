@@ -14,6 +14,10 @@ const ProductOrder = require('./ProductOrder')(sequelize);
 Chair.hasOne(Barber, { foreignKey: 'chairId', as: 'barber' });
 Barber.belongsTo(Chair, { foreignKey: 'chairId', as: 'chair' });
 
+// ── Quan hệ Barber - User ──────────────────────────────
+User.hasOne(Barber, { foreignKey: 'userId', as: 'barber_profile' });
+Barber.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 // ── Quan hệ Booking ────────────────────────────────────
 User.hasMany(Booking, { foreignKey: 'userId', as: 'bookings' });
 Booking.belongsTo(User, { foreignKey: 'userId', as: 'user' });

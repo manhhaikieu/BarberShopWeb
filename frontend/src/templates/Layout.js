@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
-import './Layout.css';
+import '../styles/templates/Layout.css';
 
 const Layout = ({ children }) => {
     const { user, logout, hasClaim, hasRole } = useAuth();

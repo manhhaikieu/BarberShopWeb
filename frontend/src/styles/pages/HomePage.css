@@ -132,7 +132,11 @@
 }
 
 .dark-section h2 {
-    font-size: 3rem;
+    font-size: 3.5rem;
+    color: #d4af37;
+    margin: 15px 0 25px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .services-grid {

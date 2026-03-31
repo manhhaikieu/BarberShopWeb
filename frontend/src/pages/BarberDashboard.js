@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { barberAPI, bookingAPI } from '../api/apiService';
-import './AdminPages.css';
+import '../styles/pages/AdminPages.css';
 
 const BarberDashboard = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);

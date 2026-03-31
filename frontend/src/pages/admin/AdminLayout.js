@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/AuthContext';
-import './AdminLayout.css';
+import '../../styles/pages/admin/AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
     const { user, logout } = useAuth();
@@ -44,6 +44,9 @@ const AdminLayout = ({ children }) => {
                     </NavLink>
                     <NavLink to="/admin/bookings" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
                         <span className="nav-icon">📅</span> Quản lý Lịch hẹn
+                    </NavLink>
+                    <NavLink to="/admin/revenue" className={({ isActive }) => isActive ? 'admin-nav-item active' : 'admin-nav-item'}>
+                        <span className="nav-icon">💰</span> Quản lý Doanh thu
                     </NavLink>
                 </nav>
 
