@@ -52,11 +52,31 @@ const BookingPage = () => {
         setError('');
         setSuccess('');
 
-        if (selectedServices.length === 0) { setError('Vui lòng chọn ít nhất 1 dịch vụ.'); return; }
-        if (!selectedTime) { setError('Vui lòng chọn giờ.'); return; }
-        if (!selectedChair) { setError('Vui lòng chọn ghế.'); return; }
+        // Validation chi tiết
+        if (selectedServices.length === 0) { 
+            setError('Vui lòng chọn ít nhất 1 dịch vụ.'); 
+            return; 
+        }
+        if (!selectedTime) { 
+            setError('Vui lòng chọn giờ hẹn.'); 
+            return; 
+        }
+        if (!selectedChair) { 
+            setError('Vui lòng chọn ghế.'); 
+            return; 
+        }
 
-        const startDateTime = new Date(`${date}T${selectedTime}`);
+        // Tạo startTime đúng timezone
+        const [hours, minutes] = selectedTime.split(':').map(Number);
+        const startDateTime = new Date(date);
+        startDateTime.setHours(hours, minutes, 0, 0);
+        
+        // Kiểm tra không đặt lịch trong quá khứ
+        if (startDateTime <= new Date()) {
+            setError('Không thể đặt lịch cho thời gian đã qua.');
+            return;
+        }
+
         setSubmitting(true);
         try {
             await addBooking({
@@ -82,9 +102,17 @@ const BookingPage = () => {
 
     const isTimeSlotValid = (timeStr) => {
         const dur = totalDuration || 30;
-        const startObj = new Date(`${date}T${timeStr}`);
+        // Parse time slot với timezone local
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const startObj = new Date(date);
+        startObj.setHours(hours, minutes, 0, 0);
         const endObj = new Date(startObj.getTime() + dur * 60000);
-        if (startObj <= new Date()) return false;
+
+        // So sánh với thời gian hiện tại (chỉ disable nếu đã qua)
+        const now = new Date();
+        if (startObj <= now) return false;
+
+        // Kiểm tra ghế bận
         const busyChairIds = dailyBookings.filter(b => {
             const bStart = new Date(b.startTime);
             const bEnd = new Date(b.endTime);
@@ -94,7 +122,9 @@ const BookingPage = () => {
     };
 
     const busyChairIdsAtSelectedTime = selectedTime ? dailyBookings.filter(b => {
-        const startObj = new Date(`${date}T${selectedTime}`);
+        const [hours, minutes] = selectedTime.split(':').map(Number);
+        const startObj = new Date(date);
+        startObj.setHours(hours, minutes, 0, 0);
         const endObj = new Date(startObj.getTime() + (totalDuration || 30) * 60000);
         const bStart = new Date(b.startTime);
         const bEnd = new Date(b.endTime);
