@@ -1,34 +1,34 @@
 # BarberShopWeb
 
-## Day La Gi?
+## Đây Là Gì?
 
-Day la du an BarberShopWeb, mot he thong quan ly tiem toc theo mo hinh fullstack. Trong du an nay, toi phu trach backend (REST API + nghiep vu + ket noi database).
+Đây là dự án BarberShopWeb, một hệ thống quản lý tiệm tóc theo mô hình fullstack. Trong dự án này, tôi phụ trách backend (REST API + nghiệp vụ + kết nối database).
 
-He thong gom:
+Hệ thống gồm:
 
-- Frontend cho khach hang, tho cat toc va admin thao tac tren giao dien web
-- Backend REST API xu ly nghiep vu dat lich, san pham, tai khoan va phan quyen
-- Database MySQL luu tru toan bo du lieu
+- Frontend cho khách hàng, thợ cắt tóc và admin thao tác trên giao diện web
+- Backend REST API xử lý nghiệp vụ đặt lịch, sản phẩm, tài khoản và phân quyền
+- Database MySQL lưu trữ toàn bộ dữ liệu
 
-## De Lam Gi?
+## Để Làm Gì?
 
-Muc tieu cua du an la so hoa quy trinh van hanh barber shop:
+Mục tiêu của dự án là số hóa quy trình vận hành barber shop:
 
-- Khach hang dang ky, dang nhap, cap nhat thong tin
-- Dat lich cat toc, theo doi lich hen, huy lich
-- Quan ly dich vu, san pham, don hang san pham
-- Quan ly tho cat toc va ghe
-- Phan quyen theo vai tro (customer, staff, barber, admin)
+- Khách hàng đăng ký, đăng nhập, cập nhật thông tin
+- Đặt lịch cắt tóc, theo dõi lịch hẹn, hủy lịch
+- Quản lý dịch vụ, sản phẩm, đơn hàng sản phẩm
+- Quản lý thợ cắt tóc và ghế
+- Phân quyền theo vai trò (customer, staff, barber, admin)
 
-## Cong Nghe Su Dung
+## Công Nghệ Sử Dụng
 
 - Frontend: React (Create React App), React Router
 - Backend: Node.js, Express, Sequelize
 - Database: MySQL
-- Xac thuc: JWT
+- Xác thực: JWT
 - Test backend: Jest, Supertest
 
-## Cau Truc Du An
+## Cấu Trúc Dự Án
 
 ```text
 BarberShopWeb/
@@ -36,15 +36,15 @@ BarberShopWeb/
   frontend/    # React client app
 ```
 
-## Dieu Kien Can
+## Điều Kiện Cần
 
-- Node.js 18 tro len
-- npm 9 tro len
-- MySQL 8 tro len (hoac tuong thich)
+- Node.js 18 trở lên
+- npm 9 trở lên
+- MySQL 8 trở lên (hoặc tương thích)
 
-## Cach Chay Local
+## Cách Chạy Local
 
-1. Cai dependencies
+1. Cài dependencies
 
 ```bash
 cd backend
@@ -54,7 +54,7 @@ cd ../frontend
 npm install
 ```
 
-2. Chay backend
+2. Chạy backend
 
 ```bash
 cd backend
@@ -63,22 +63,22 @@ npm run dev
 
 Health check API: http://localhost:5000/api/health
 
-3. Chay frontend (terminal moi)
+3. Chạy frontend (terminal mới)
 
 ```bash
 cd frontend
 npm start
 ```
 
-Truy cap giao dien: http://localhost:3000
+Truy cập giao diện: http://localhost:3000
 
 ## Database Setup
 
-- Dam bao MySQL dang chay
-- Tao database ten barbershop
-- Chay backend de Sequelize tu dong sync bang
+- Đảm bảo MySQL đang chạy
+- Tạo database tên barbershop
+- Chạy backend để Sequelize tự động sync bảng
 
-Seed du lieu mau (tuy chon):
+Seed dữ liệu mẫu (tùy chọn):
 
 ```bash
 cd backend
@@ -87,46 +87,46 @@ npm run seed
 
 ## Test
 
-Chay test backend:
+Chạy test backend:
 
 ```bash
 cd backend
 npm test
 ```
 
-Bao cao do bao phu:
+Báo cáo độ bao phủ:
 
 ```bash
 cd backend
 npm run test:coverage
 ```
 
-## Deploy O Dau?
+## Deploy Ở Đâu?
 
-Co the deploy theo cach tach frontend va backend:
+Có thể deploy theo cách tách frontend và backend:
 
 - Frontend (React): Vercel, Netlify, Firebase Hosting
 - Backend (Node.js): Render, Railway, Fly.io, VPS
 - Database MySQL: Aiven, PlanetScale (MySQL-compatible), Railway MySQL, VPS
 
-Goi y nhanh:
+Gợi ý nhanh:
 
-1. Deploy backend truoc, lay URL API production
-2. Cau hinh frontend goi dung API production + /api
-3. Cau hinh CORS backend cho domain frontend
-4. Bao mat thong tin cau hinh production va tai khoan database
+1. Deploy backend trước, lấy URL API production
+2. Cấu hình frontend gọi đúng API production + /api
+3. Cấu hình CORS backend cho domain frontend
+4. Bảo mật thông tin cấu hình production và tài khoản database
 
-## Vai Tro Cua Toi Trong Du An
+## Vai Trò Của Tôi Trong Dự Án
 
-Toi dang lam backend cho du an nay, cu the:
+Tôi đang làm backend cho dự án này, cụ thể:
 
-- Thiet ke va phat trien REST API
-- Xu ly logic dat lich, san pham, don hang, tai khoan
-- Xay dung xac thuc JWT va phan quyen theo vai tro
-- Quan ly model/database voi Sequelize + MySQL
-- Ho tro deploy backend va ket noi voi frontend
+- Thiết kế và phát triển REST API
+- Xử lý logic đặt lịch, sản phẩm, đơn hàng, tài khoản
+- Xây dựng xác thực JWT và phân quyền theo vai trò
+- Quản lý model/database với Sequelize + MySQL
+- Hỗ trợ deploy backend và kết nối với frontend
 
-## Cac API Route Chinh
+## Các API Route Chính
 
 - /api/auth
 - /api/bookings
@@ -139,4 +139,4 @@ Toi dang lam backend cho du an nay, cu the:
 
 ## License
 
-MIT (hoac thay bang license ban su dung)
+MIT (hoặc thay bằng license bạn sử dụng)
