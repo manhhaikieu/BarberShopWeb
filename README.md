@@ -1,16 +1,34 @@
 # BarberShopWeb
 
-Fullstack barber shop management and booking application.
+## Day La Gi?
 
-## Tech Stack
+Day la du an BarberShopWeb, mot he thong quan ly tiem toc theo mo hinh fullstack. Trong du an nay, toi phu trach backend (REST API + nghiep vu + ket noi database).
+
+He thong gom:
+
+- Frontend cho khach hang, tho cat toc va admin thao tac tren giao dien web
+- Backend REST API xu ly nghiep vu dat lich, san pham, tai khoan va phan quyen
+- Database MySQL luu tru toan bo du lieu
+
+## De Lam Gi?
+
+Muc tieu cua du an la so hoa quy trinh van hanh barber shop:
+
+- Khach hang dang ky, dang nhap, cap nhat thong tin
+- Dat lich cat toc, theo doi lich hen, huy lich
+- Quan ly dich vu, san pham, don hang san pham
+- Quan ly tho cat toc va ghe
+- Phan quyen theo vai tro (customer, staff, barber, admin)
+
+## Cong Nghe Su Dung
 
 - Frontend: React (Create React App), React Router
 - Backend: Node.js, Express, Sequelize
 - Database: MySQL
-- Auth: JWT
-- Testing: Jest, Supertest (backend)
+- Xac thuc: JWT
+- Test backend: Jest, Supertest
 
-## Project Structure
+## Cau Truc Du An
 
 ```text
 BarberShopWeb/
@@ -18,48 +36,15 @@ BarberShopWeb/
   frontend/    # React client app
 ```
 
-## Main Features
+## Dieu Kien Can
 
-- User registration, login, profile update
-- JWT-based authentication and role/permission checks
-- Booking management (create, list, status update, cancel)
-- Services management
-- Products management and product orders
-- Barbers and chairs management
-- Product image upload endpoint
-- Admin and barber dashboard pages in frontend
+- Node.js 18 tro len
+- npm 9 tro len
+- MySQL 8 tro len (hoac tuong thich)
 
-## Prerequisites
+## Cach Chay Local
 
-- Node.js 18+
-- npm 9+
-- MySQL 8+ (or compatible)
-
-## Environment Variables
-
-Create `backend/.env`:
-
-```env
-PORT=5000
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=barbershop
-DB_USER=root
-DB_PASS=your_password
-JWT_SECRET=your_secret_key
-JWT_EXPIRES_IN=7d
-NODE_ENV=development
-```
-
-Optional: create `frontend/.env` if your API is not on localhost:5000.
-
-```env
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-## Install Dependencies
-
-From the repository root:
+1. Cai dependencies
 
 ```bash
 cd backend
@@ -69,33 +54,31 @@ cd ../frontend
 npm install
 ```
 
-## Run In Development
-
-1. Start backend:
+2. Chay backend
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Backend health check: `http://localhost:5000/api/health`
+Health check API: http://localhost:5000/api/health
 
-2. Start frontend (new terminal):
+3. Chay frontend (terminal moi)
 
 ```bash
 cd frontend
 npm start
 ```
 
-Frontend: `http://localhost:3000`
+Truy cap giao dien: http://localhost:3000
 
 ## Database Setup
 
-- Ensure MySQL is running.
-- Create database `barbershop` (or match your `.env` value).
-- Start backend once to let Sequelize sync models.
+- Dam bao MySQL dang chay
+- Tao database ten barbershop
+- Chay backend de Sequelize tu dong sync bang
 
-Run seed data (optional):
+Seed du lieu mau (tuy chon):
 
 ```bash
 cd backend
@@ -104,37 +87,56 @@ npm run seed
 
 ## Test
 
-Backend tests:
+Chay test backend:
 
 ```bash
 cd backend
 npm test
 ```
 
-Coverage report:
+Bao cao do bao phu:
 
 ```bash
 cd backend
 npm run test:coverage
 ```
 
-## API Base Routes
+## Deploy O Dau?
 
-- `/api/auth`
-- `/api/bookings`
-- `/api/services`
-- `/api/products`
-- `/api/product-orders`
-- `/api/barbers`
-- `/api/chairs`
-- `/api/upload`
+Co the deploy theo cach tach frontend va backend:
 
-## Deployment Notes
+- Frontend (React): Vercel, Netlify, Firebase Hosting
+- Backend (Node.js): Render, Railway, Fly.io, VPS
+- Database MySQL: Aiven, PlanetScale (MySQL-compatible), Railway MySQL, VPS
 
-- Set secure production values for all env vars, especially `JWT_SECRET`.
-- Configure CORS in backend for your frontend domain.
-- Use a production MySQL instance and backups.
+Goi y nhanh:
+
+1. Deploy backend truoc, lay URL API production
+2. Cau hinh frontend goi dung API production + /api
+3. Cau hinh CORS backend cho domain frontend
+4. Bao mat thong tin cau hinh production va tai khoan database
+
+## Vai Tro Cua Toi Trong Du An
+
+Toi dang lam backend cho du an nay, cu the:
+
+- Thiet ke va phat trien REST API
+- Xu ly logic dat lich, san pham, don hang, tai khoan
+- Xay dung xac thuc JWT va phan quyen theo vai tro
+- Quan ly model/database voi Sequelize + MySQL
+- Ho tro deploy backend va ket noi voi frontend
+
+## Cac API Route Chinh
+
+- /api/auth
+- /api/bookings
+- /api/services
+- /api/products
+- /api/product-orders
+- /api/barbers
+- /api/chairs
+- /api/upload
 
 ## License
 
-MIT (or your preferred license)
+MIT (hoac thay bang license ban su dung)
