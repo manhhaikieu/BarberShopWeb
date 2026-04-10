@@ -137,6 +137,3 @@ Tôi đang làm backend cho dự án này, cụ thể:
 - /api/chairs
 - /api/upload
 
-## License
-
-MIT (hoặc thay bằng license bạn sử dụng)
