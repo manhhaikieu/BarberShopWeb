@@ -1,6 +1,6 @@
 # BarberShopWeb
 
-## Đây Là Gì?
+##  Hệ thống quản lý tiệm tóc
 
 Đây là dự án BarberShopWeb, một hệ thống quản lý tiệm tóc theo mô hình fullstack. Trong dự án này, tôi phụ trách backend (REST API + nghiệp vụ + kết nối database).
 
@@ -10,7 +10,7 @@ Hệ thống gồm:
 - Backend REST API xử lý nghiệp vụ đặt lịch, sản phẩm, tài khoản và phân quyền
 - Database MySQL lưu trữ toàn bộ dữ liệu
 
-## Để Làm Gì?
+## Chức năng
 
 Mục tiêu của dự án là số hóa quy trình vận hành barber shop:
 
@@ -23,10 +23,9 @@ Mục tiêu của dự án là số hóa quy trình vận hành barber shop:
 ## Công Nghệ Sử Dụng
 
 - Frontend: React (Create React App), React Router
-- Backend: Node.js, Express, Sequelize
+- Backend: Node.js, Express
 - Database: MySQL
 - Xác thực: JWT
-- Test backend: Jest, Supertest
 
 ## Cấu Trúc Dự Án
 
@@ -101,20 +100,6 @@ cd backend
 npm run test:coverage
 ```
 
-## Deploy Ở Đâu?
-
-Có thể deploy theo cách tách frontend và backend:
-
-- Frontend (React): Vercel, Netlify, Firebase Hosting
-- Backend (Node.js): Render, Railway, Fly.io, VPS
-- Database MySQL: Aiven, PlanetScale (MySQL-compatible), Railway MySQL, VPS
-
-Gợi ý nhanh:
-
-1. Deploy backend trước, lấy URL API production
-2. Cấu hình frontend gọi đúng API production + /api
-3. Cấu hình CORS backend cho domain frontend
-4. Bảo mật thông tin cấu hình production và tài khoản database
 
 ## Vai Trò Của Tôi Trong Dự Án
 
@@ -137,3 +122,6 @@ Tôi đang làm backend cho dự án này, cụ thể:
 - /api/chairs
 - /api/upload
 
+## Note
+Project này chủ yếu để luyện code nên chưa hoàn chỉnh, vẫn còn bug và chưa tối ưu.  
+Mình làm project này để hiểu rõ hơn cách hoạt động của backend và flow đặt lịch.
